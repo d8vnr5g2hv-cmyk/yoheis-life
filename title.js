@@ -74,32 +74,48 @@
   // ---------- 各画面へ（開くたびに壁紙をランダムで） ----------
   function openScreen(id) {
     const s = $('#' + id);
-    s.classList.remove('hideui'); $('.sheet', s).classList.remove('full', 'indetail');
+    setPage(s, 1, false);
+    s.querySelector('.s2').classList.remove('indetail');
     if (id === 'ledger') Wall.render();
     show(id, { before:() => Wall.apply($('.wall', s), Wall.pick(s.dataset.who, id)) });
   }
+  // 1枚目（壁紙）⇔ 2枚目（機能）
+  function setPage(s, n, fx = true) {
+    const was = s.classList.contains('p2');
+    s.classList.toggle('p2', n === 2);
+    $$('.dots i', s).forEach((d, i) => d.classList.toggle('on', i === n - 1));
+    if (fx && was !== (n === 2)) {
+      const f = document.createElement('i'); f.className = 'slidefx' + (n === 1 ? ' back' : ''); document.body.appendChild(f); setTimeout(() => f.remove(), 520);
+      se.wipe(); if (n === 2) rise($('.s2', s));
+    }
+  }
+  $$('.wscreen').forEach(s => {
+    $('[data-next]', s).addEventListener('click', () => setPage(s, 2));
+    let x0 = null, y0 = 0;
+    s.addEventListener('touchstart', e => { x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; }, { passive:true });
+    s.addEventListener('touchend', e => {
+      if (x0 === null) return; const dx = e.changedTouches[0].clientX - x0, dy = e.changedTouches[0].clientY - y0; x0 = null;
+      if (Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy) * 1.3) setPage(s, dx < 0 ? 2 : 1);
+    }, { passive:true });
+  });
   $$('[data-go]').forEach(b => b.addEventListener('click', () => openScreen(b.dataset.go)));
   $$('[data-back]').forEach(b => b.addEventListener('click', () => show('lobby')));
 
-  // シートの引き上げ・絵だけ表示
-  $$('[data-sheet]').forEach(h => h.addEventListener('click', () => h.parentElement.classList.toggle('full')));
-  $$('.more').forEach(m => m.addEventListener('click', () => m.closest('.sheet') && m.closest('.sheet').classList.add('full')));
-  $$('[data-expand]').forEach(b => b.addEventListener('click', e => { e.stopPropagation(); b.closest('.screen').classList.toggle('hideui'); }));
-  $$('.screen').forEach(s => s.addEventListener('click', e => {
-    if (s.classList.contains('hideui') && !e.target.closest('[data-expand]')) s.classList.remove('hideui');
-  }));
+  // ロビーの⤢（絵だけ表示）
+  $$('#lobby [data-expand]').forEach(b => b.addEventListener('click', e => { e.stopPropagation(); $('#lobby').classList.toggle('hideui'); }));
+  $('#lobby').addEventListener('click', e => { if ($('#lobby').classList.contains('hideui') && !e.target.closest('[data-expand]')) $('#lobby').classList.remove('hideui'); });
 
   // 台帳：カードを選んで中へ
   const DT = { money:'Money', body:'Body', people:'People', vault:'Vault', wall:'Wallpaper' };
   $$('.lcard').forEach(c => c.addEventListener('click', () => {
-    const p = c.dataset.p, sh = $('#ledger .sheet');
+    const p = c.dataset.p, sh = $('#ledger .s2');
     $$('#ledger .pane').forEach(x => x.classList.toggle('on', x.id === 'p-' + p));
     $('#dTitle').textContent = DT[p];
     if (p === 'wall') Wall.render();
     sh.classList.add('indetail'); $('.in', sh).scrollTop = 0; rise($('#p-' + p));
     $$('[data-count]', $('#p-' + p)).forEach(UI.countUp);
   }));
-  $('[data-dback]').addEventListener('click', () => { $('#ledger .sheet').classList.remove('indetail'); rise($('#ledger .lselect')); });
+  $('[data-dback]').addEventListener('click', () => { $('#ledger .s2').classList.remove('indetail'); rise($('#ledger .lselect')); });
 
   // 音のオン・オフ（覚えておく）
   let muted = localStorage.getItem('yl-mute') === '1';

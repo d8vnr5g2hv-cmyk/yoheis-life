@@ -23,7 +23,7 @@
   <img class="poster" id="tPoster" alt="">
   <video id="tVideo" muted playsinline autoplay loop preload="auto"></video>
   <div class="shade"></div>
-  <div class="ver">Ver : 0.3.3（見本）</div>
+  <div class="ver">Ver : 0.4.0（見本）</div>
   <div class="logo" aria-label="Yohei's Life">
     <svg viewBox="0 0 300 150">
       <defs><linearGradient id="lg" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#5BE6FF"/><stop offset=".55" stop-color="#00C8F8"/><stop offset="1" stop-color="#1E9BFF"/></linearGradient></defs>
@@ -89,11 +89,12 @@
 
 <!-- ============ トーク ============ -->
 <section id="talk" class="screen wscreen" data-who="both" aria-label="トーク">
-  <img class="wall" alt=""><div class="wall-fade"></div>
   <div class="hdr"><button class="backbtn" data-back aria-label="戻る"><span data-ic="back" data-s="20" data-w="2.8"></span></button>
     <div class="bar"><h1>トーク</h1><span class="sp"></span><button class="ic" data-back data-ic="home" data-s="20" aria-label="ロビー"></button></div></div>
-  <button class="chip expand" data-expand aria-label="絵だけ表示"><span data-ic="expand" data-s="14" data-w="2.6"></span></button>
-  <div class="sheet"><div class="handle" data-sheet><i></i></div><div class="in">
+  <div class="slides">
+    <div class="sl s1"><img class="wall" alt=""><div class="wall-fade"></div>
+      <button class="sum" data-next><i class="en">TALK</i><span>未読 2件 ・ ミカ「466円って何？」</span><b>›</b></button></div>
+    <div class="sl s2 page"><div class="in">
     <div class="lbl rise">未読<small>2件</small></div>
     <div class="list rise">
       <div class="item"><img class="av" src="av_mika.webp" alt=""><div class="bd"><b>ミカ</b><small>11/21 19:29の466円って何？</small></div><span class="ub">1</span></div>
@@ -103,17 +104,20 @@
     <div class="list rise">
       <div class="item dim"><img class="av" src="av_mika.webp" alt=""><div class="bd"><b>ミカ</b><small>おかえり、先生☆ 今日は1,240円だったよ</small></div><small class="num" style="color:var(--mute)">22:14</small></div>
     </div>
-    <button class="more rise">シートを引き上げて、前のトークを見る</button>
+    <button class="more rise">前のトークを見る</button>
   </div></div>
+  </div>
+  <div class="dots"><i class="on"></i><i></i></div>
 </section>
 
 <!-- ============ タスク ============ -->
 <section id="task" class="screen wscreen" data-who="both" aria-label="タスク">
-  <img class="wall" alt=""><div class="wall-fade"></div>
   <div class="hdr"><button class="backbtn" data-back aria-label="戻る"><span data-ic="back" data-s="20" data-w="2.8"></span></button>
     <div class="bar"><h1>タスク</h1><span class="sp"></span><button class="ic" data-back data-ic="home" data-s="20" aria-label="ロビー"></button></div></div>
-  <button class="chip expand" data-expand aria-label="絵だけ表示"><span data-ic="expand" data-s="14" data-w="2.6"></span></button>
-  <div class="sheet"><div class="handle" data-sheet><i></i></div><div class="in">
+  <div class="slides">
+    <div class="sl s1"><img class="wall" alt=""><div class="wall-fade"></div>
+      <button class="sum" data-next><i class="en">TASK</i><span>今日あと2件 ・ 家賃は12/5まで</span><b>›</b></button></div>
+    <div class="sl s2 page"><div class="in">
     <div class="kz rise"><span class="hrt">4</span><span>ミカとの絆</span><div class="gauge"><i data-to="65"></i></div><span class="num">65%</span></div>
     <div class="lbl rise">今日<small>1 / 3</small></div>
     <div class="list rise">
@@ -123,15 +127,18 @@
     </div>
     <button class="more rise">ほか 4件（期限つき 2件）</button>
   </div></div>
+  </div>
+  <div class="dots"><i class="on"></i><i></i></div>
 </section>
 
 <!-- ============ 予定 ============ -->
 <section id="plan" class="screen wscreen" data-who="hoshino" aria-label="予定">
-  <img class="wall" alt=""><div class="wall-fade"></div>
   <div class="hdr"><button class="backbtn" data-back aria-label="戻る"><span data-ic="back" data-s="20" data-w="2.8"></span></button>
     <div class="bar"><h1>予定</h1><span class="sp"></span><button class="ic" data-back data-ic="home" data-s="20" aria-label="ロビー"></button></div></div>
-  <button class="chip expand" data-expand aria-label="絵だけ表示"><span data-ic="expand" data-s="14" data-w="2.6"></span></button>
-  <div class="sheet"><div class="handle" data-sheet><i></i></div><div class="in">
+  <div class="slides">
+    <div class="sl s1"><img class="wall" alt=""><div class="wall-fade"></div>
+      <button class="sum" data-next><i class="en">NEXT</i><span>19:00 山下さんと梅田</span><b>›</b></button></div>
+    <div class="sl s2 page"><div class="in">
     <div class="lead rise"><img src="av_hoshino.webp" alt=""><p>今日は19時から梅田だよ〜。お金は2千円残しといてね〜</p></div>
     <div class="lbl rise">今日<small>3件</small></div>
     <div class="list rise">
@@ -145,15 +152,18 @@
       <div class="item dim"><span class="tm num">11/27</span><div class="bd"><b>坂井さんとサシ</b></div></div>
     </div>
   </div></div>
+  </div>
+  <div class="dots"><i class="on"></i><i></i></div>
 </section>
 
 <!-- ============ 台帳 ============ -->
 <section id="ledger" class="screen wscreen" data-who="mika" aria-label="台帳">
-  <img class="wall" alt=""><div class="wall-fade"></div>
   <div class="hdr"><button class="backbtn" data-back aria-label="戻る"><span data-ic="back" data-s="20" data-w="2.8"></span></button>
     <div class="bar"><h1>台帳</h1><span class="sp"></span><button class="ic" data-back data-ic="home" data-s="20" aria-label="ロビー"></button></div></div>
-  <button class="chip expand" data-expand aria-label="絵だけ表示"><span data-ic="expand" data-s="14" data-w="2.6"></span></button>
-  <div class="sheet"><div class="handle" data-sheet><i></i></div><div class="in">
+  <div class="slides">
+    <div class="sl s1"><img class="wall" alt=""><div class="wall-fade"></div>
+      <button class="sum" data-next><i class="en">LEDGER</i><span>残高 ¥38,200 ・ 滞納 2件</span><b>›</b></button></div>
+    <div class="sl s2 page"><div class="in">
     <div class="lselect">
       <div class="lead rise"><img src="av_mika.webp" alt=""><p>おかえり、先生☆ 何を見る？</p></div>
       <div class="selhead rise"><span class="en">Ledger Select</span><small>台帳</small></div>
@@ -214,6 +224,8 @@
     </div>
     </div>
   </div></div>
+  </div>
+  <div class="dots"><i class="on"></i><i></i></div>
 </section>
 
 <script src="ui.js"></script>
