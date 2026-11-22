@@ -164,8 +164,8 @@ input[type=range]{width:100%;accent-color:var(--cyan-bar)}
 
 /* ---------- トースト ---------- */
 .toast{position:fixed;left:8px;right:8px;top:calc(44px + var(--sat));z-index:60;display:flex;align-items:center;gap:8px;padding:7px 12px 7px 9px;color:#fff;
-  background:rgba(20,52,84,.94);clip-path:polygon(0 0,100% 0,calc(100% - 9px) 100%,0 100%);transform:translateY(-140%);transition:transform .4s var(--ease)}
-.toast.on{transform:none}
+  background:rgba(20,52,84,.94);clip-path:polygon(0 0,100% 0,calc(100% - 9px) 100%,0 100%);opacity:0;visibility:hidden;pointer-events:none;transform:translateY(-10px);transition:opacity .3s,transform .4s var(--ease),visibility 0s .4s}
+.toast.on{opacity:1;visibility:visible;transform:none;transition:opacity .3s,transform .4s var(--ease)}
 .toast::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--accent)}
 .toast img{width:28px;height:28px;border-radius:50%;background:#fff}
 .toast b{display:block;font-size:11px;color:var(--accent)}
@@ -256,19 +256,24 @@ input[type=range]{width:100%;accent-color:var(--cyan-bar)}
 .selhead .en{font-size:20px;color:#2F5A92}
 .selhead small{font-size:11px;font-weight:700;color:var(--mute)}
 .lcards{display:flex;flex-direction:column;gap:7px}
-.lcard{position:relative;display:block;width:100%;height:76px;border-radius:6px;overflow:hidden;background:#fff;text-align:left;box-shadow:0 1px 0 var(--line),0 2px 6px rgba(20,52,84,.08);transition:transform .12s}
+.lcard{position:relative;display:block;width:100%;height:100px;border-radius:6px;overflow:hidden;background:#fff;text-align:left;box-shadow:0 1px 0 var(--line),0 2px 6px rgba(20,52,84,.08);transition:transform .12s}
 .lcard:active{transform:scale(.98)}
 .lcard img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:100% 62%}
-.lcard::before{content:"";position:absolute;inset:0;z-index:1;background:linear-gradient(90deg,rgba(255,255,255,.96) 0 26%,rgba(255,255,255,.7) 40%,rgba(255,255,255,0) 62%)}
-.lcard .lb{position:absolute;left:10px;top:10px;z-index:2;display:flex;align-items:center;gap:7px}
-.lcard .lb i{font:800 11px/18px var(--en);font-style:italic;color:#fff;background:var(--navy2);padding:0 7px;border-radius:3px}
+.lcard::before{content:"";position:absolute;inset:0;z-index:1;background:linear-gradient(90deg,rgba(255,255,255,.97) 0 34%,rgba(255,255,255,.75) 50%,rgba(255,255,255,0) 72%)}
+.lcard>*:not(img){position:absolute;z-index:2}
+.lcard .lb{left:10px;top:9px;display:flex;align-items:center;gap:7px}
+.lcard .lb i{font:800 10px/17px var(--en);font-style:italic;color:#fff;background:var(--navy2);padding:0 6px;border-radius:3px}
 .lcard .lb b{font-size:16px;font-weight:900;color:var(--ink2)}
-.lcard .val{position:absolute;right:0;bottom:0;z-index:2;padding:4px 12px 4px 16px;background:rgba(252,252,252,.92);clip-path:polygon(8px 0,100% 0,100% 100%,0 100%);font-size:11px;font-weight:700;color:var(--ink3)}
-.lcard .val .num{font-size:15px;color:var(--ink2);margin-left:4px}
-.lcard .val.red .num{color:var(--red)}
-.lcard .sub{position:absolute;left:12px;bottom:9px;z-index:2;font-size:11px;font-weight:700;color:var(--mute)}
+.lcard .ds{left:11px;top:35px;width:58%;font-size:11px;font-weight:700;color:var(--ink3);line-height:1.4}
+.lcard .st{left:8px;bottom:8px;right:8px;display:flex;gap:5px}
+.lcard .st span{display:inline-flex;align-items:baseline;gap:4px;height:22px;padding:0 8px;background:rgba(252,252,252,.94);border-radius:3px;box-shadow:0 0 0 1px rgba(44,68,100,.08);font-size:11px;font-weight:700;color:var(--ink3);line-height:22px;white-space:nowrap}
+.lcard .st .num{font-size:13px;color:var(--ink2)}
+.lcard .st .red .num,.lcard .st .red{color:var(--red)}
+.lcard .go{right:8px;top:8px;width:22px;height:22px;border-radius:50%;background:rgba(68,96,152,.9);color:#fff;display:grid;place-items:center;font:800 13px/1 var(--en)}
 .ldetail{display:none}
 .indetail .lselect{display:none}
 .indetail .ldetail{display:block}
 .dback{display:flex;align-items:center;gap:6px;margin:2px 0 8px;font-weight:900;font-size:13px;color:var(--back)}
 .dback .en{font-size:16px;color:var(--ink2);margin-left:4px}
+.wth .new{position:absolute;right:3px;top:3px;padding:0 4px;border-radius:2px;background:#F04A3A;color:#fff;font:800 9px/14px var(--en)}
+.wth.just{box-shadow:0 0 0 2px var(--cyan-bar)}

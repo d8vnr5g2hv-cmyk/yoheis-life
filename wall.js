@@ -10,7 +10,7 @@ const Wall = (() => {
     { id:'d-m2', who:'mika', src:'16_mika_night_tall_poster.jpg', fy:20, def:true },
   ];
   const FY = JSON.parse(localStorage.getItem('yl-wall-fy') || '{}');   // 初期壁紙の位置だけはここに保存
-  let db = null, list = [], urls = {};
+  let db = null, list = [], urls = {}, justId = null;
 
   function open() {
     return new Promise(res => {
@@ -56,34 +56,40 @@ const Wall = (() => {
   // ---------- 台帳の壁紙タブ ----------
   function render() {
     const $ = UI.$;
-    if ($('#wcAll')) $('#wcAll').textContent = list.length + '枚';
+    const n = who => list.filter(x => x.who === who).length + '枚';
+    if ($('#wcH2')) { $('#wcH2').textContent = n('hoshino'); $('#wcM2').textContent = n('mika'); }
     ['hoshino', 'mika'].forEach(who => {
       const g = $(who === 'hoshino' ? '#wgH' : '#wgM'), ws = list.filter(w => w.who === who);
       $(who === 'hoshino' ? '#wcH' : '#wcM').textContent = ws.length + '枚';
-      g.innerHTML = ws.map(w => `<button class="wth" data-w="${w.id}"><img src="${srcOf(w)}" style="object-position:50% ${fyOf(w)}%" alt="">${w.def ? '<span class="def">初期</span>' : ''}</button>`).join('')
+      g.innerHTML = ws.map(w => `<button class="wth${w.id === justId ? ' just' : ''}" data-w="${w.id}"><img src="${srcOf(w)}" style="object-position:50% ${fyOf(w)}%" alt="">${w.def ? '<span class="def">初期</span>' : ''}${w.isNew ? '<span class="new">NEW</span>' : ''}</button>`).join('')
         + `<label class="wth add" aria-label="写真から追加">${UI.icon('plus', 22, 2.6)}<input type="file" accept="image/*" multiple data-add="${who}"></label>`;
     });
   }
   async function add(files, who) {
+    let last = null, n = 0;
     for (const f of files) {
       if (!f.type.startsWith('image/')) continue;
       const w = { id:'u-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6), who, blob:f, fy:20, at:Date.now() };
-      await put(w); list.push(w);
+      await put(w); w.isNew = true; list.push(w); last = w; n++;
     }
-    render(); UI.toast({ who: who === 'mika' ? 'ミカ' : 'ホシノ', av: who === 'mika' ? 'av_mika.webp' : 'av_hoshino.webp', text:'壁紙、増やしといたよ' });
+    if (!last) return;
+    justId = last.id; render();
+    const name = who === 'mika' ? 'ミカ' : 'ホシノ';
+    UI.toast({ who:name, av: who === 'mika' ? 'av_mika.webp' : 'av_hoshino.webp', text:`${name}の壁紙に${n}枚追加したよ。顔の位置を合わせてね` });
+    setTimeout(() => adjust(last.id, true), 500);   // 追加したらすぐ位置合わせへ
   }
-  function adjust(id) {
+  function adjust(id, fresh) {
     const w = list.find(x => x.id === id); if (!w) return;
     let fy = fyOf(w);
     const d = UI.pop({
-      title:'位置の調整',
-      body:`<div class="frame"><img src="${srcOf(w)}" style="object-position:50% ${fy}%" alt=""><div class="sh"></div><div class="zone"><span>顔をここに</span></div></div>
+      title: fresh ? '追加しました' : '位置の調整',
+      body:`${fresh ? '<p style="font-size:13px;font-weight:700;color:var(--ink3);text-align:center;margin-bottom:6px">顔が点線より上に入るように合わせてください</p>' : ''}<div class="frame"><img src="${srcOf(w)}" style="object-position:50% ${fy}%" alt=""><div class="sh"></div><div class="zone"><span>顔をここに</span></div></div>
         <input type="range" min="0" max="100" step="1" value="${fy}" aria-label="縦の位置">`,
       buttons:[
         ...(w.def ? [] : [{ label:'削除', cls:'navy', onClick:async () => { await del(w.id); list = list.filter(x => x.id !== w.id); render(); } }]),
         { label:'保存', onClick:async () => {
           if (w.def) { FY[w.id] = fy; localStorage.setItem('yl-wall-fy', JSON.stringify(FY)); } else { w.fy = fy; await put(w); }
-          render();
+          render(); UI.toast({ who:'ホシノ', av:'av_hoshino.webp', text:'壁紙を保存したよ〜。次に画面を開いたときから出るからね' });
         } },
       ],
     });
