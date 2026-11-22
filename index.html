@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Yohei's Life">
+<meta name="theme-color" content="#0b1830">
+<title>Yohei's Life</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Exo+2:ital,wght@0,600;0,800;1,700;1,800;1,900&family=Noto+Sans+JP:wght@500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ============ タイトル ============ -->
+<section id="title" class="screen on" aria-label="タイトル">
+  <img class="poster" id="tPoster" alt="">
+  <video id="tVideo" muted playsinline autoplay loop preload="auto"></video>
+  <div class="shade"></div>
+  <div class="ver">UID : 0122 0001<br>Ver : 0.1.0（見本）</div>
+  <div class="logo" aria-label="Yohei's Life">
+    <svg viewBox="0 0 340 150">
+      <defs>
+        <linearGradient id="lg" x1="0" x2="1"><stop offset="0" stop-color="#00D4F8"/><stop offset="1" stop-color="#5BE6FF"/></linearGradient>
+      </defs>
+      <ellipse cx="190" cy="44" rx="64" ry="20" fill="none" stroke="#fff" stroke-width="3" transform="rotate(-14 190 44)" opacity=".95"/>
+      <path d="M232 0 L150 140" stroke="#00D4F8" stroke-width="3.2" stroke-linecap="round"/>
+      <path d="M120 60 L250 92" stroke="#fff" stroke-width="2.2" stroke-linecap="round" opacity=".9"/>
+      <g transform="skewX(-14)">
+        <text x="30" y="86" font-family="Noto Sans JP" font-weight="900" font-size="46" fill="url(#lg)" stroke="#fff" stroke-width="7" paint-order="stroke" letter-spacing="-1">ヨウヘイズ</text>
+        <text x="62" y="128" font-family="Exo 2" font-style="italic" font-weight="900" font-size="34" fill="#fff" stroke="#1b6fd0" stroke-width="5" paint-order="stroke">Yohei's Life</text>
+      </g>
+    </svg>
+  </div>
+  <div class="tbtns">
+    <button class="tbtn" data-act="notice"><span>お知らせ</span></button>
+    <button class="tbtn" data-act="menu"><span>MENU</span></button>
+    <button class="tbtn dark" data-act="data"><span>データの設定</span></button>
+  </div>
+  <div class="touch"><span>TOUCH TO START</span></div>
+  <div class="copy">© Yohei's Life — for Yohei only</div>
+  <div class="flash"></div>
+</section>
+
+<!-- ============ ローディング ============ -->
+<section id="loading" class="screen" aria-label="読み込み中">
+  <div class="lt" id="lTip">おじさん、ちょっとだけお昼寝……</div>
+  <img id="lImg" alt="">
+  <div class="lbar"><i id="lBar"></i></div>
+  <div class="lnow">Now Loading…</div>
+</section>
+
+<!-- ============ ロビー ============ -->
+<section id="lobby" class="screen" aria-label="ロビー">
+  <img class="poster" id="lbPoster" alt="">
+  <video id="lbVideo" muted playsinline autoplay loop preload="auto"></video>
+  <div class="tapzone" id="tapzone" data-tap></div>
+
+  <div class="lv rise"><div class="navyp">
+    <div class="d"><b id="lvDate">11/22</b><span id="lvDay">日曜日</span></div>
+    <div class="sub"><span>給料日まで</span><span id="lvPay">23日</span></div>
+    <div class="gauge"><i id="lvGauge" data-to="40"></i></div>
+  </div></div>
+
+  <div class="res rise">
+    <div class="pill"><span style="color:#F2A51A" data-ic="sun" data-s="18"></span><span>18°</span></div>
+    <div class="pill"><span style="color:#D9A400" data-ic="yen" data-s="18"></span><span data-count="38200">0</span></div>
+  </div>
+
+  <div class="licons rise">
+    <button class="licon pink" data-go="トーク"><div class="ib" data-ic="talk" data-s="28"></div>トーク<span class="badge">2</span></button>
+    <button class="licon" data-go="タスク"><div class="ib" data-ic="task" data-s="28"></div>タスク<span class="badge" style="background:#2E8EE6">1/3</span></button>
+  </div>
+  <button class="swap" id="swap" aria-label="キャラを切り替え">1/2</button>
+
+  <div class="say" id="say"><div class="bubble" id="sayText"></div></div>
+
+  <div class="dock">
+    <div class="rail">
+      <button class="it2" data-go="トーク"><div class="gi" data-ic="talk" data-s="30"></div>トーク<i class="dot"></i></button>
+      <button class="it2" data-go="タスク"><div class="gi" data-ic="task" data-s="30"></div>タスク<i class="dot"></i></button>
+      <button class="it2" data-go="予定"><div class="gi" data-ic="plan" data-s="30"></div>予定</button>
+      <button class="it2" data-go="台帳"><div class="gi" data-ic="book" data-s="30"></div>台帳</button>
+    </div>
+    <button class="main" data-go="UIキット" aria-label="UIキット"><div class="fold"><span data-ic="s" data-s="34" data-w="3"></span></div><b>見本</b></button>
+  </div>
+</section>
+
+<!-- ============ UIキット（見本） ============ -->
+<section id="kit" class="screen page" aria-label="UIキット">
+  <div class="hdr">
+    <button class="backbtn" data-back aria-label="戻る"><span data-ic="back" data-s="26" data-w="2.8"></span></button>
+    <div class="bar"><h1 id="kitTitle">UIキット</h1><span class="q">?</span><span class="sp"></span>
+      <button class="ic" data-ic="gear" data-s="22" aria-label="設定"></button><button class="ic" data-back data-ic="home" data-s="24" aria-label="ロビー"></button></div>
+  </div>
+  <div class="scroll">
+
+    <div class="sec rise"><span class="en">Buttons</span><small>ボタン</small></div>
+    <div class="rise" style="display:flex;gap:10px;flex-wrap:wrap">
+      <button class="bt"><i class="shine"></i><span>OK</span></button>
+      <button class="bt"><i class="shine"></i><span>進む</span></button>
+      <button class="bt navy"><i class="shine"></i><span>キャンセル</span></button>
+    </div>
+    <div class="rise" style="margin-top:12px;display:flex;gap:10px">
+      <button class="bt big" style="flex:1"><i class="shine"></i><span>ユーザー情報</span></button>
+      <button class="bt big" style="flex:1"><i class="shine"></i><span>IDカード</span></button>
+    </div>
+    <div class="grid2 rise" style="margin-top:14px">
+      <button class="mbtn"><span class="mi" data-ic="gear"></span>オプション</button>
+      <button class="mbtn"><span class="mi" data-ic="book"></span>アカウント</button>
+      <button class="mbtn"><span class="mi" data-ic="phone"></span>おやすみ電話</button>
+      <button class="mbtn"><span class="mi" data-ic="star"></span>壁紙</button>
+    </div>
+
+    <div class="sec rise"><span class="en">Panel</span><small>紺の帯と項目</small></div>
+    <div class="secbar rise">呼び名</div>
+    <div class="card rise" style="margin-top:6px;padding:4px 14px">
+      <div style="display:flex;align-items:center;height:54px;gap:12px"><span style="color:var(--ink3);font-weight:700;width:64px">呼び名</span><b style="flex:1;font-size:17px">ヨウヘイ</b><b style="font-size:17px">先生</b></div>
+    </div>
+    <div class="secbar rise" style="margin-top:10px">プロフィール設定</div>
+    <div class="card rise" style="margin-top:6px;padding:4px 14px">
+      <div style="display:flex;align-items:center;height:64px;gap:12px;border-bottom:1px solid #E2E8EE"><span style="color:var(--ink3);font-weight:700;width:64px">当番</span><img src="av_mika.webp" style="width:46px;height:46px;border-radius:8px;transform:skewX(-6deg);border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.2)" alt=""><b style="flex:1">ミカ</b></div>
+      <div style="display:flex;align-items:center;height:54px;gap:12px"><span style="color:var(--ink3);font-weight:700;width:64px">挨拶</span><span style="flex:1">おかえり、先生☆</span></div>
+    </div>
+
+    <div class="sec rise"><span class="en">List</span><small>行と決定ボタン</small></div>
+    <div class="tray rise">
+      <div class="row"><span class="t">家賃の支払い（12/5まで）</span><button class="bt"><i class="shine"></i><span>払った</span></button></div>
+      <div class="row"><span class="t">先取り貯金を移す</span><button class="bt"><i class="shine"></i><span>移した</span></button></div>
+      <div class="row"><span class="t">洗剤を買う</span><button class="bt"><i class="shine"></i><span>候補</span></button></div>
+    </div>
+
+    <div class="sec rise"><span class="en">Tabs</span><small>タブ</small></div>
+    <div class="rise">
+      <div class="tabs" id="tabs"><button class="on">お金</button><button>体</button><button>人</button><button>金庫</button></div>
+      <div class="card" style="border-radius:0 0 10px 10px;padding:14px">
+        <div class="mini">口座残高（推定）</div>
+        <div class="num" data-count="38200" data-pre="¥">0</div>
+        <div style="display:flex;justify-content:space-between;margin-top:6px;font-weight:700"><span>今月使った</span><span data-count="41800" data-pre="¥">0</span></div>
+        <div style="display:flex;justify-content:space-between;margin-top:4px;font-weight:700" class="note-red"><span>滞納</span><span>2件</span></div>
+      </div>
+    </div>
+    <div class="side rise" style="margin-top:12px">
+      <nav id="side"><button class="on">通知</button><button>壁紙</button><button>音量</button></nav>
+      <div class="pane">
+        <div style="font-weight:900;color:var(--ink2);border-left:3px solid var(--cyan-bar);padding-left:8px">朝の知らせ</div>
+        <div class="radio" id="radio"><label class="on"><i></i>毎日</label><label><i></i>平日</label><label><i></i>OFF</label></div>
+        <div class="info" style="margin-top:12px">LINEで届く知らせは、1日5通前後に抑えます。</div>
+      </div>
+    </div>
+
+    <div class="sec rise"><span class="en">Talk</span><small>吹き出しと絆</small></div>
+    <div class="demo-chibi rise">
+      <img src="mika_chibi.webp" alt="">
+      <div class="bubble" style="flex:1;text-align:left">先生、今月あと<b style="color:#2A84D8">12,400円</b>だよ。<br>飲み会の分、残しといてね☆</div>
+    </div>
+    <div class="kizuna rise" style="margin-top:14px">
+      <div class="heart">4</div>
+      <div style="flex:1"><div style="display:flex;justify-content:space-between;font-weight:900;font-size:13px;color:var(--ink2)"><span>ミカとの絆</span><span class="en" style="font-size:13px">65%</span></div>
+        <div class="gauge" style="margin-top:4px"><i data-to="65"></i></div></div>
+    </div>
+
+    <div class="sec rise"><span class="en">Notice</span><small>知らせと通知</small></div>
+    <div class="card rise" style="overflow:hidden">
+      <div class="newshead"><span class="en">Y.L NEWS</span><span class="tag">今日の予定</span></div>
+      <div style="padding:12px 14px;font-weight:700;line-height:1.7">19:00　山下さんと梅田<br><span class="mini">ホシノ：明日は飲みだから、お金は2千円残しといてね〜</span></div>
+    </div>
+    <div class="rise" style="margin-top:14px;display:flex;gap:10px">
+      <button class="bt" style="flex:1" id="openPop"><i class="shine"></i><span>ポップアップ</span></button>
+      <button class="bt" style="flex:1" id="openToast"><i class="shine"></i><span>通知を出す</span></button>
+    </div>
+    <div class="rise" style="margin-top:22px;text-align:center"><button class="bt big navy" data-back><i class="shine"></i><span>ロビーへ戻る</span></button></div>
+  </div>
+</section>
+
+<script src="ui.js"></script>
+<script src="title.js"></script>
+</body>
+</html>

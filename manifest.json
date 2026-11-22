@@ -1,0 +1,11 @@
+{
+  "name": "Yohei's Life",
+  "short_name": "Yohei's Life",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0b1830",
+  "theme_color": "#0b1830",
+  "icons": [{ "src": "icon.png", "sizes": "1024x1024", "type": "image/png", "purpose": "any" }]
+}
