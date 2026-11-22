@@ -1,18 +1,18 @@
 // ============================================================
-// Yohei's Life — タイトル → ローディング → ロビー（見本）
+// Yohei's Life — タイトル → ローディング → ロビー → 各画面（見本 v0.2）
 // ============================================================
-(() => {
+(async () => {
   const { $, $$, se, playBgm, playVoice, show, rise, pop, toast, paintIcons } = UI;
   paintIcons();
+  const wallReady = Wall.load();
 
-  // ---------- キャラ ----------
   const CH = {
-    hoshino: { name:'ホシノ', av:'av_hoshino.webp', chibi:'hoshino_chibi.webp', bgm:'bgm.mp3', voice:i => `c1_v${String(i).padStart(2, '0')}.mp3`, nv:12,
-      lobbies:[['lobby_tall_h264.mp4', 'lobby_tall_poster.jpg'], ['09_aquarium_tall_h264.mp4', '09_aquarium_tall_poster.jpg']],
+    hoshino: { av:'av_hoshino.webp', chibi:'hoshino_chibi.webp', bgm:'bgm.mp3', voice:i => `c1_v${String(i).padStart(2, '0')}.mp3`, nv:12,
+      lobby:['lobby_tall_h264.mp4', 'lobby_tall_poster.jpg'], title:['09_aquarium_tall_h264.mp4', '09_aquarium_tall_poster.jpg'],
       lines:['うへ〜、先生おかえり〜。今日もほどほどにね〜', '予定はおじさんが見とくから、先生はのんびりしてて〜', 'お昼寝……じゃなくて、休憩中だよ〜'],
       tips:['おじさん、ちょっとだけお昼寝……', '予定の1時間前には声かけるからね〜', 'LINEで送れば、おじさんが整理しとくよ〜'] },
-    mika: { name:'ミカ', av:'av_mika.webp', chibi:'mika_chibi.webp', bgm:'c2_bgm.mp3', voice:i => `c2_v${String(i).padStart(2, '0')}.mp3`, nv:10,
-      lobbies:[['mika_tall_h264.mp4', 'mika_tall_poster.jpg'], ['16_mika_night_tall_h264.mp4', '16_mika_night_tall_poster.jpg']],
+    mika: { av:'av_mika.webp', chibi:'mika_chibi.webp', bgm:'c2_bgm.mp3', voice:i => `c2_v${String(i).padStart(2, '0')}.mp3`, nv:10,
+      lobby:['mika_tall_h264.mp4', 'mika_tall_poster.jpg'], title:['16_mika_night_tall_h264.mp4', '16_mika_night_tall_poster.jpg'],
       lines:['先生、おかえり☆ 今日は何に使ったの？', 'お金のことは私に任せて！……たぶん☆', '給料日まで、一緒にがんばろっか'],
       tips:['お買い物は計画的に、だよ☆', 'Apple Payで払うと、私がすぐ記録するね', '滞納ゼロまで、あと少し！'] },
   };
@@ -20,97 +20,84 @@
   let who = Math.random() < .5 ? 'hoshino' : 'mika';
 
   function setVideo(v, p, [src, poster]) {
-    p.src = poster; v.style.opacity = 0;
-    v.src = src; v.load();
+    p.src = poster; v.style.opacity = 0; v.src = src; v.load();
     v.oncanplay = () => { v.play().catch(() => {}); v.style.opacity = 1; };
   }
 
   // ---------- タイトル ----------
-  const [tSrc] = [pick(CH[who].lobbies)];
-  setVideo($('#tVideo'), $('#tPoster'), tSrc);
-
+  setVideo($('#tVideo'), $('#tPoster'), CH[who].title);
   let started = false;
   $('#title').addEventListener('click', e => {
     const b = e.target.closest('[data-act]');
-    if (b) {
-      const t = { notice:'お知らせ', menu:'メニュー', data:'データの設定' }[b.dataset.act];
-      pop({ title:t, body:`<div class="tray"><div class="row"><span class="t">見本では中身はまだありません</span></div></div>` });
-      return;
-    }
+    if (b) { pop({ title:b.dataset.act, body:`<div class="list"><div class="item"><div class="bd"><b>見本では、まだ中身はありません</b></div></div></div>` }); return; }
     if (started) return; started = true;
-    se.start(); $('.flash').classList.add('go');
-    playBgm('bgm_title.mp3', .4);
-    setTimeout(() => show('loading').then(load), 260);
+    se.start(); $('.flash').classList.add('go'); playBgm('bgm_title.mp3', .4);
+    setTimeout(() => show('loading').then(load), 240);
   });
 
   // ---------- ローディング ----------
   function load() {
     const c = CH[who];
     $('#lImg').src = c.chibi; $('#lTip').textContent = pick(c.tips);
-    const bar = $('#lBar'), t0 = performance.now(), ms = 2000;
-    // 本番ではここで素材を先読みする。見本は時間で進める
-    const v = $('#lbVideo'); setVideo(v, $('#lbPoster'), c.lobbies[0]);
-    (function step(t) {
-      const k = Math.min(1, (t - t0) / ms); bar.style.width = (k * 100) + '%';
-      k < 1 ? requestAnimationFrame(step) : enterLobby();
-    })(t0);
+    setVideo($('#lbVideo'), $('#lbPoster'), c.lobby);
+    const bar = $('#lBar'), t0 = performance.now(), ms = 1800;
+    (function step(t) { const k = Math.min(1, (t - t0) / ms); bar.style.width = (k * 100) + '%'; k < 1 ? requestAnimationFrame(step) : wallReady.then(enterLobby); })(t0);
   }
 
   // ---------- ロビー ----------
   function fillTop() {
-    const d = new Date(), wd = '日月火水木金土'[d.getDay()];
+    const d = new Date();
     $('#lvDate').textContent = `${d.getMonth() + 1}/${d.getDate()}`;
-    $('#lvDay').textContent = wd + '曜日';
-    let pay = new Date(d.getFullYear(), d.getMonth(), 15);
-    if (d.getDate() >= 15) pay = new Date(d.getFullYear(), d.getMonth() + 1, 15);
-    const prev = new Date(pay.getFullYear(), pay.getMonth() - 1, 15);
-    const left = Math.ceil((pay - d) / 864e5), span = Math.round((pay - prev) / 864e5);
-    $('#lvPay').textContent = left + '日';
-    $('#lvGauge').dataset.to = Math.round((1 - left / span) * 100);
+    $('#lvDay').textContent = '日月火水木金土'[d.getDay()];
+    let pay = new Date(d.getFullYear(), d.getMonth(), 15); if (d.getDate() >= 15) pay = new Date(d.getFullYear(), d.getMonth() + 1, 15);
+    $('#lvPay').textContent = Math.ceil((pay - d) / 864e5);
   }
+  let toasted = false;
   function enterLobby() {
     fillTop();
     show('lobby').then(() => {
       playBgm(CH[who].bgm, .4);
-      setTimeout(() => toast({ who:'ミカ', av:'av_mika.webp', text:'11/21 19:29の466円って何？' }), 1400);
+      if (!toasted) { toasted = true; setTimeout(() => toast({ who:'ミカ', av:'av_mika.webp', text:'11/21 19:29の466円って何？' }), 1500); }
     });
   }
-
-  let li = 0, sayT;
-  function say() {
+  let sayT;
+  $('#tapzone').addEventListener('click', () => {
     const c = CH[who]; playVoice(c.voice(1 + Math.floor(Math.random() * c.nv)));
     $('#sayText').textContent = pick(c.lines); $('#say').classList.add('on');
-    clearTimeout(sayT); sayT = setTimeout(() => $('#say').classList.remove('on'), 3200);
-  }
-  $('#tapzone').addEventListener('click', say);
+    clearTimeout(sayT); sayT = setTimeout(() => $('#say').classList.remove('on'), 3000);
+  });
   $('#swap').addEventListener('click', () => {
-    who = who === 'hoshino' ? 'mika' : 'hoshino'; li = 0;
+    who = who === 'hoshino' ? 'mika' : 'hoshino';
     $('#swap').textContent = who === 'hoshino' ? '1/2' : '2/2';
-    setVideo($('#lbVideo'), $('#lbPoster'), CH[who].lobbies[0]);
-    playBgm(CH[who].bgm, .4); $('#say').classList.remove('on');
+    setVideo($('#lbVideo'), $('#lbPoster'), CH[who].lobby); playBgm(CH[who].bgm, .4); $('#say').classList.remove('on');
   });
 
-  // ---------- 見本ページへ ----------
-  $$('[data-go]').forEach(b => b.addEventListener('click', () => {
-    $('#kitTitle').textContent = b.dataset.go;
-    show('kit');
-  }));
+  // ---------- 各画面へ（開くたびに壁紙をランダムで） ----------
+  function openScreen(id) {
+    const s = $('#' + id);
+    s.classList.remove('hideui'); $('.sheet', s).classList.remove('full');
+    if (id === 'ledger') Wall.render();
+    show(id, { before:() => Wall.apply($('.wall', s), Wall.pick(s.dataset.who, id)) });
+  }
+  $$('[data-go]').forEach(b => b.addEventListener('click', () => openScreen(b.dataset.go)));
   $$('[data-back]').forEach(b => b.addEventListener('click', () => show('lobby')));
 
-  // タブ・サイドタブ・ラジオ
-  $('#tabs').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; $$('#tabs button').forEach(x => x.classList.toggle('on', x === b)); });
-  $('#side').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; $$('#side button').forEach(x => x.classList.toggle('on', x === b)); });
-  $('#radio').addEventListener('click', e => { const l = e.target.closest('label'); if (!l) return; $$('#radio label').forEach(x => x.classList.toggle('on', x === l)); });
-
-  $('#openPop').addEventListener('click', () => pop({
-    title:'アカウント',
-    body:`<div class="tray"><div class="row"><span class="t">LINEの連携</span><button class="bt"><i class="shine"></i><span>OK</span></button></div>
-      <div class="row"><span class="t">壁紙の管理</span><button class="bt"><i class="shine"></i><span>進む</span></button></div>
-      <div class="row"><span class="t">データの控え</span><button class="bt"><i class="shine"></i><span>OK</span></button></div></div>`,
-    buttons:[{ label:'閉じる', cls:'navy' }],
+  // シートの引き上げ・絵だけ表示
+  $$('[data-sheet]').forEach(h => h.addEventListener('click', () => h.parentElement.classList.toggle('full')));
+  $$('.more').forEach(m => m.addEventListener('click', () => m.closest('.sheet') && m.closest('.sheet').classList.add('full')));
+  $$('[data-expand]').forEach(b => b.addEventListener('click', e => { e.stopPropagation(); b.closest('.screen').classList.toggle('hideui'); }));
+  $$('.screen').forEach(s => s.addEventListener('click', e => {
+    if (s.classList.contains('hideui') && !e.target.closest('[data-expand]')) s.classList.remove('hideui');
   }));
-  $('#openToast').addEventListener('click', () => toast({ who:'ホシノ', av:'av_hoshino.webp', text:'先生〜、19時から山下さんと梅田だよ〜' }));
 
-  // 画面ごとの「出てくる動き」
-  rise($('#title'));
+  // 台帳のタブ
+  $('#seg').addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    $$('#seg button').forEach(x => x.classList.toggle('on', x === b));
+    $$('#ledger .pane').forEach(p => p.classList.toggle('on', p.id === 'p-' + b.dataset.p));
+    if (b.dataset.p === 'wall') Wall.render();
+    rise($('#p-' + b.dataset.p));
+  });
+  // チェックの切り替え（見本）
+  $$('.check').forEach(c => c.addEventListener('click', () => { c.classList.toggle('on'); if (c.classList.contains('on') && !c.innerHTML) c.innerHTML = UI.icon('check', 13, 3); }));
 })();

@@ -20,6 +20,11 @@ const UI = (() => {
     yen:'<rect x="3" y="6" width="18" height="12" rx="2"/><path d="M9 9l3 3 3-3M12 12v4M9.5 13.5h5"/>',
     star:'<path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/>',
     bell:'<path d="M6 16V11a6 6 0 0112 0v5l2 2H4z"/><path d="M10 20a2 2 0 004 0"/>',
+    expand:'<path d="M14 4h6v6M10 20H4v-6M20 4l-7 7M4 20l7-7"/>',
+    plus:'<path d="M12 5v14M5 12h14"/>',
+    check:'<path d="M5 12.5l4.5 4.5L19 7.5"/>',
+    image:'<rect x="4" y="4" width="16" height="16" rx="2"/><circle cx="9" cy="9" r="1.8"/><path d="M20 15l-5-5-9 9"/>',
+    up:'<path d="M6 15l6-6 6 6"/>',
     s:'<path d="M16 6.5C15 5 13.6 4.3 12 4.3c-2.4 0-4 1.3-4 3.2 0 4.4 8.4 2.6 8.4 7.4 0 2.3-1.9 3.8-4.6 3.8-1.9 0-3.6-.8-4.6-2.3"/>',
   };
   const icon = (n, s = 24, w = 2.2) => `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${P[n] || ''}</svg>`;
@@ -78,8 +83,8 @@ const UI = (() => {
       setTimeout(() => { w.remove(); busy = false; res(); }, 470);
     }, 400));
   }
-  function show(id, { anim = true } = {}) {
-    const go = () => { $$('.screen').forEach(s => s.classList.toggle('on', s.id === id)); rise($('#' + id)); };
+  function show(id, { anim = true, before } = {}) {
+    const go = () => { before && before(); $$('.screen').forEach(s => s.classList.toggle('on', s.id === id)); rise($('#' + id)); };
     return anim ? wipe(go) : (go(), Promise.resolve());
   }
 
@@ -98,16 +103,16 @@ const UI = (() => {
 
   // ---------- ポップアップ ----------
   function pop({ title, body, buttons = [{ label: 'OK' }] }) {
-    const d = document.createElement('div'); d.className = 'dim on';
+    const d = document.createElement('div'); d.className = 'scrim';
     d.innerHTML = `<div class="pop" role="dialog" aria-label="${title}"><div class="ph"><h2>${title}</h2><button class="x" aria-label="閉じる">${icon('x', 30, 2.6)}</button></div>
-      <div class="pb">${body}</div><div class="pf">${buttons.map((b, i) => `<button class="bt ${b.cls || ''}" data-i="${i}"><i class="shine"></i><span>${b.label}</span></button>`).join('')}</div></div>`;
+      <div class="pb">${body}</div><div class="pf">${buttons.map((b, i) => `<button class="bt ${b.cls || ''}" data-i="${i}"><span>${b.label}</span></button>`).join('')}</div></div>`;
     document.body.appendChild(d); se.open(); paintIcons(d);
     const close = () => { se.close(); d.style.transition = 'opacity .16s'; d.style.opacity = 0; setTimeout(() => d.remove(), 170); };
     d.addEventListener('click', e => {
       if (e.target === d || e.target.closest('.x')) return close();
-      const b = e.target.closest('[data-i]'); if (b) { se.ok(); const f = buttons[+b.dataset.i].onClick; close(); f && f(); }
+      const b = e.target.closest('[data-i]'); if (b) { se.ok(); const f = buttons[+b.dataset.i].onClick; if (f && f(d) === false) return; close(); }
     });
-    return close;
+    d.close = close; return d;
   }
 
   // ---------- 通知 ----------
@@ -121,8 +126,8 @@ const UI = (() => {
 
   // ---------- 全体のタップ反応 ----------
   document.addEventListener('pointerdown', e => {
-    const b = e.target.closest('button,.licon,.mbtn,[data-tap]');
-    if (b && !b.closest('.dim')) { se.tap(); sparkle(e.clientX, e.clientY); }
+    const b = e.target.closest('button,label.wth,[data-tap]');
+    if (b && !b.closest('.scrim')) { se.tap(); sparkle(e.clientX, e.clientY); }
   }, { passive: true });
 
   return { $, $$, icon, paintIcons, se, playBgm, playVoice, mute, wipe, show, rise, countUp, pop, toast, sparkle };
