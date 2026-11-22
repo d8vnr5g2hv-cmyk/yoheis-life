@@ -61,16 +61,14 @@
       if (!toasted) { toasted = true; setTimeout(() => toast({ who:'ミカ', av:'av_mika.webp', text:'11/21 19:29の466円って何？' }), 1500); }
     });
   }
-  let sayT;
+
   $('#tapzone').addEventListener('click', () => {
-    const c = CH[who]; playVoice(c.voice(1 + Math.floor(Math.random() * c.nv)));
-    $('#sayText').textContent = pick(c.lines); $('#say').classList.add('on');
-    clearTimeout(sayT); sayT = setTimeout(() => $('#say').classList.remove('on'), 3000);
+    const c = CH[who]; playVoice(c.voice(1 + Math.floor(Math.random() * c.nv)));   // ロビーは声だけ（吹き出しなし）
   });
   $('#swap').addEventListener('click', () => {
     who = who === 'hoshino' ? 'mika' : 'hoshino';
     $('#swap').textContent = who === 'hoshino' ? '1/2' : '2/2';
-    setVideo($('#lbVideo'), $('#lbPoster'), CH[who].lobby); playBgm(CH[who].bgm, .4); $('#say').classList.remove('on');
+    setVideo($('#lbVideo'), $('#lbPoster'), CH[who].lobby); playBgm(CH[who].bgm, .4);
   });
 
   // ---------- 各画面へ（開くたびに壁紙をランダムで） ----------
