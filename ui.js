@@ -25,6 +25,8 @@ const UI = (() => {
     check:'<path d="M5 12.5l4.5 4.5L19 7.5"/>',
     image:'<rect x="4" y="4" width="16" height="16" rx="2"/><circle cx="9" cy="9" r="1.8"/><path d="M20 15l-5-5-9 9"/>',
     up:'<path d="M6 15l6-6 6 6"/>',
+    sound:'<path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16 9a4 4 0 010 6M18.5 6.5a8 8 0 010 11"/>',
+    mute:'<path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M17 9l5 6M22 9l-5 6"/>',
     s:'<path d="M16 6.5C15 5 13.6 4.3 12 4.3c-2.4 0-4 1.3-4 3.2 0 4.4 8.4 2.6 8.4 7.4 0 2.3-1.9 3.8-4.6 3.8-1.9 0-3.6-.8-4.6-2.3"/>',
   };
   const icon = (n, s = 24, w = 2.2) => `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${P[n] || ''}</svg>`;

@@ -56,6 +56,7 @@ const Wall = (() => {
   // ---------- 台帳の壁紙タブ ----------
   function render() {
     const $ = UI.$;
+    if ($('#wcAll')) $('#wcAll').textContent = list.length + '枚';
     ['hoshino', 'mika'].forEach(who => {
       const g = $(who === 'hoshino' ? '#wgH' : '#wgM'), ws = list.filter(w => w.who === who);
       $(who === 'hoshino' ? '#wcH' : '#wcM').textContent = ws.length + '枚';

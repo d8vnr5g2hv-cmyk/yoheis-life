@@ -36,9 +36,10 @@
   });
 
   // ---------- ローディング ----------
+  const LOADS = [['load_1.webp', '先生、どっちと行くの？'], ['load_2.webp', 'おつかれさま、先生'], ['load_3.webp', 'どっちのお弁当にする？'], ['load_4.webp', 'お昼寝？ それともお買い物？']];
   function load() {
-    const c = CH[who];
-    $('#lImg').src = c.chibi; $('#lTip').textContent = pick(c.tips);
+    const c = CH[who], [img, line] = pick(LOADS);
+    $('#lImg').src = img; $('#lTip').textContent = line;
     setVideo($('#lbVideo'), $('#lbPoster'), c.lobby);
     const bar = $('#lBar'), t0 = performance.now(), ms = 1800;
     (function step(t) { const k = Math.min(1, (t - t0) / ms); bar.style.width = (k * 100) + '%'; k < 1 ? requestAnimationFrame(step) : wallReady.then(enterLobby); })(t0);
@@ -75,7 +76,7 @@
   // ---------- 各画面へ（開くたびに壁紙をランダムで） ----------
   function openScreen(id) {
     const s = $('#' + id);
-    s.classList.remove('hideui'); $('.sheet', s).classList.remove('full');
+    s.classList.remove('hideui'); $('.sheet', s).classList.remove('full', 'indetail');
     if (id === 'ledger') Wall.render();
     show(id, { before:() => Wall.apply($('.wall', s), Wall.pick(s.dataset.who, id)) });
   }
@@ -90,14 +91,24 @@
     if (s.classList.contains('hideui') && !e.target.closest('[data-expand]')) s.classList.remove('hideui');
   }));
 
-  // 台帳のタブ
-  $('#seg').addEventListener('click', e => {
-    const b = e.target.closest('button'); if (!b) return;
-    $$('#seg button').forEach(x => x.classList.toggle('on', x === b));
-    $$('#ledger .pane').forEach(p => p.classList.toggle('on', p.id === 'p-' + b.dataset.p));
-    if (b.dataset.p === 'wall') Wall.render();
-    rise($('#p-' + b.dataset.p));
-  });
+  // 台帳：カードを選んで中へ
+  const DT = { money:'Money', body:'Body', people:'People', vault:'Vault', wall:'Wallpaper' };
+  $$('.lcard').forEach(c => c.addEventListener('click', () => {
+    const p = c.dataset.p, sh = $('#ledger .sheet');
+    $$('#ledger .pane').forEach(x => x.classList.toggle('on', x.id === 'p-' + p));
+    $('#dTitle').textContent = DT[p];
+    if (p === 'wall') Wall.render();
+    sh.classList.add('indetail'); $('.in', sh).scrollTop = 0; rise($('#p-' + p));
+    $$('[data-count]', $('#p-' + p)).forEach(UI.countUp);
+  }));
+  $('[data-dback]').addEventListener('click', () => { $('#ledger .sheet').classList.remove('indetail'); rise($('#ledger .lselect')); });
+
+  // 音のオン・オフ（覚えておく）
+  let muted = localStorage.getItem('yl-mute') === '1';
+  const paintSnd = () => { $('#snd').innerHTML = UI.icon(muted ? 'mute' : 'sound', 15, 2.4); };
+  UI.mute(muted); paintSnd();
+  $('#snd').addEventListener('click', e => { e.stopPropagation(); muted = !muted; localStorage.setItem('yl-mute', muted ? '1' : '0'); UI.mute(muted); paintSnd(); });
+
   // チェックの切り替え（見本）
   $$('.check').forEach(c => c.addEventListener('click', () => { c.classList.toggle('on'); if (c.classList.contains('on') && !c.innerHTML) c.innerHTML = UI.icon('check', 13, 3); }));
 })();
