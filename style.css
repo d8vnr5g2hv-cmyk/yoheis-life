@@ -258,8 +258,8 @@ input[type=range]{width:100%;accent-color:var(--cyan-bar)}
 .lcards{display:flex;flex-direction:column;gap:7px}
 .lcard{position:relative;display:block;width:100%;height:76px;border-radius:6px;overflow:hidden;background:#fff;text-align:left;box-shadow:0 1px 0 var(--line),0 2px 6px rgba(20,52,84,.08);transition:transform .12s}
 .lcard:active{transform:scale(.98)}
-.lcard img{position:absolute;right:0;top:0;width:76%;height:100%;object-fit:cover}
-.lcard::before{content:"";position:absolute;inset:0;z-index:1;background:linear-gradient(90deg,#fff 0 30%,rgba(255,255,255,.85) 42%,rgba(255,255,255,0) 70%)}
+.lcard img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:100% 62%}
+.lcard::before{content:"";position:absolute;inset:0;z-index:1;background:linear-gradient(90deg,rgba(255,255,255,.96) 0 26%,rgba(255,255,255,.7) 40%,rgba(255,255,255,0) 62%)}
 .lcard .lb{position:absolute;left:10px;top:10px;z-index:2;display:flex;align-items:center;gap:7px}
 .lcard .lb i{font:800 11px/18px var(--en);font-style:italic;color:#fff;background:var(--navy2);padding:0 7px;border-radius:3px}
 .lcard .lb b{font-size:16px;font-weight:900;color:var(--ink2)}
