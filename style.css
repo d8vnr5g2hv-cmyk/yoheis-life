@@ -197,8 +197,18 @@ input[type=range]{width:100%;accent-color:var(--cyan-bar)}
    タイトル
    ============================================================ */
 #title{background:#0b1830}
-#title video,#title .poster{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-#title .shade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(8,18,40,.25) 0%,rgba(8,18,40,0) 26%,rgba(8,18,40,0) 62%,rgba(8,18,40,.4) 100%)}
+#title .tart{position:absolute;inset:0;transform-origin:50% 42%;animation:kb 20s ease-in-out infinite alternate}
+#title .tart img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 38%}
+#tWake{opacity:0;transition:opacity .45s ease}
+#title.awake #tWake{opacity:1}
+#title.awake .tart{animation-play-state:paused}
+@keyframes kb{from{transform:scale(1.03)}to{transform:scale(1.11) translate(-1.2%,.8%)}}
+.tfx{position:absolute;inset:0;overflow:hidden;pointer-events:none}
+.tfx .pt{position:absolute;bottom:-12px;border-radius:50%;background:radial-gradient(circle,#fff 0 30%,rgba(255,255,255,.5) 45%,transparent 70%);animation:ptf linear infinite;opacity:0}
+@keyframes ptf{0%{transform:translate(0,0);opacity:0}12%{opacity:.9}80%{opacity:.6}100%{transform:translate(var(--dx),-105vh);opacity:0}}
+.tsweep{position:absolute;inset:-30%;background:linear-gradient(115deg,transparent 42%,rgba(255,255,255,.26) 49%,rgba(255,255,255,.06) 53%,transparent 60%);transform:translateX(-110%);animation:sweep 10s ease-in-out infinite 1.5s}
+@keyframes sweep{0%{transform:translateX(-110%)}28%,100%{transform:translateX(110%)}}
+#title .shade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(8,18,40,.18) 0%,rgba(8,18,40,0) 24%,rgba(8,18,40,0) 66%,rgba(8,18,40,.28) 100%)}
 .logo{position:absolute;left:16px;top:calc(36px + var(--sat));width:min(62%,250px);animation:logoin .9s var(--ease) both .2s}
 .logo svg{width:100%;height:auto;overflow:visible}
 @keyframes logoin{from{opacity:0;transform:translateX(-20px)}}

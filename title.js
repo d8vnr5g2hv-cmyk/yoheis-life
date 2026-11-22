@@ -8,11 +8,11 @@
 
   const CH = {
     hoshino: { av:'av_hoshino.webp', chibi:'hoshino_chibi.webp', bgm:'bgm.mp3', voice:i => `c1_v${String(i).padStart(2, '0')}.mp3`, nv:12,
-      lobby:['lobby_tall_h264.mp4', 'lobby_tall_poster.jpg'], title:['09_aquarium_tall_h264.mp4', '09_aquarium_tall_poster.jpg'],
+      lobby:['lobby_tall_h264.mp4', 'lobby_tall_poster.jpg'], art:['title_h_sleep.webp', 'title_h_wake.webp'],
       lines:['うへ〜、先生おかえり〜。今日もほどほどにね〜', '予定はおじさんが見とくから、先生はのんびりしてて〜', 'お昼寝……じゃなくて、休憩中だよ〜'],
       tips:['おじさん、ちょっとだけお昼寝……', '予定の1時間前には声かけるからね〜', 'LINEで送れば、おじさんが整理しとくよ〜'] },
     mika: { av:'av_mika.webp', chibi:'mika_chibi.webp', bgm:'c2_bgm.mp3', voice:i => `c2_v${String(i).padStart(2, '0')}.mp3`, nv:10,
-      lobby:['mika_tall_h264.mp4', 'mika_tall_poster.jpg'], title:['16_mika_night_tall_h264.mp4', '16_mika_night_tall_poster.jpg'],
+      lobby:['mika_tall_h264.mp4', 'mika_tall_poster.jpg'], art:['title_m_sleep.webp', 'title_m_wake.webp'],
       lines:['先生、おかえり☆ 今日は何に使ったの？', 'お金のことは私に任せて！……たぶん☆', '給料日まで、一緒にがんばろっか'],
       tips:['お買い物は計画的に、だよ☆', 'Apple Payで払うと、私がすぐ記録するね', '滞納ゼロまで、あと少し！'] },
   };
@@ -25,12 +25,25 @@
   }
 
   // ---------- タイトル ----------
-  setVideo($('#tVideo'), $('#tPoster'), CH[who].title);
+  // タイトル：寝ている絵 → タッチで起きた絵へ（ホシノかミカ、開くたびにランダム）
+  $('#tSleep').src = CH[who].art[0]; $('#tWake').src = CH[who].art[1];
+  const fx = $('#tFx');
+  for (let i = 0; i < 18; i++) {
+    const p = document.createElement('i'), z = 3 + Math.random() * 5;
+    p.className = 'pt';
+    p.style.cssText = `left:${Math.random() * 100}%;width:${z}px;height:${z}px;--dx:${(Math.random() - .5) * 60}px;animation-duration:${9 + Math.random() * 8}s;animation-delay:${-Math.random() * 14}s`;
+    fx.appendChild(p);
+  }
   let started = false;
-  $('#title').addEventListener('click', e => {
+  $('#title').addEventListener('click', () => {
     if (started) return; started = true;
-    se.start(); $('.flash').classList.add('go'); playBgm('bgm_title.mp3', .4);
-    setTimeout(() => show('loading').then(load), 240);
+    const c = CH[who];
+    $('#title').classList.add('awake'); se.start();
+    playVoice(c.voice(1 + Math.floor(Math.random() * c.nv)));
+    setTimeout(() => {
+      $('.flash').classList.add('go'); playBgm('bgm_title.mp3', .4);
+      setTimeout(() => show('loading').then(load), 240);
+    }, 1300);
   });
 
   // ---------- ローディング ----------
