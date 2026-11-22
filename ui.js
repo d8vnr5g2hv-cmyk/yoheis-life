@@ -52,10 +52,18 @@ const UI = (() => {
     wipe: () => tone(380, 1500, .22, .03, 'sawtooth'),
     start:() => { tone(880, 1760, .18, .06, 'triangle'); setTimeout(() => tone(1320, 2640, .25, .05, 'triangle'), 90); },
   };
+  // iPhoneはタップ中に一度再生した音声要素しか後から鳴らせないので、BGM用の2本を最初のタップで解錠して使い回す
+  const pool = [new Audio(), new Audio()]; let pi = 0, unlocked = false;
+  pool.forEach(a => { a.loop = true; a.preload = 'auto'; });
+  function unlockAudio() {
+    if (unlocked) return; unlocked = true;
+    pool.forEach(a => { if (!a.src) { a.muted = true; a.src = 'bgm_title.mp3'; a.play().then(() => { if (a !== bgm) a.pause(); a.muted = muted; }).catch(() => {}); } });
+  }
   function playBgm(src, vol = .45) {
-    if (bgm && bgm.dataset.src === src) return;
+    if (bgm && bgm.dataset.src === src && !bgm.paused) return;
     if (bgm) { const old = bgm; fadeTo(old, 0, 500, () => old.pause()); }
-    bgm = new Audio(src); bgm.dataset.src = src; bgm.loop = true; bgm.volume = 0; bgm.muted = muted;
+    pi = 1 - pi; bgm = pool[pi];
+    bgm.dataset.src = src; bgm.src = src; bgm.currentTime = 0; bgm.volume = 0; bgm.muted = muted;
     bgm.play().then(() => fadeTo(bgm, vol, 700)).catch(() => {});
   }
   function fadeTo(a, v, ms, done) {
@@ -132,5 +140,5 @@ const UI = (() => {
     if (b && !b.closest('.scrim')) { se.tap(); sparkle(e.clientX, e.clientY); }
   }, { passive: true });
 
-  return { $, $$, icon, paintIcons, se, playBgm, playVoice, mute, wipe, show, rise, countUp, pop, toast, sparkle };
+  return { $, $$, icon, paintIcons, se, unlockAudio, playBgm, playVoice, mute, wipe, show, rise, countUp, pop, toast, sparkle };
 })();

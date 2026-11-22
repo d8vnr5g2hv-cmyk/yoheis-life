@@ -39,9 +39,10 @@
     if (started) return; started = true;
     const c = CH[who];
     $('#title').classList.add('awake'); se.start();
+    UI.unlockAudio(); playBgm('bgm_title.mp3', .4);          // タップの中で鳴らす（iPhone対策）
     playVoice(c.voice(1 + Math.floor(Math.random() * c.nv)));
     setTimeout(() => {
-      $('.flash').classList.add('go'); playBgm('bgm_title.mp3', .4);
+      $('.flash').classList.add('go');
       setTimeout(() => show('loading').then(load), 240);
     }, 1300);
   });
