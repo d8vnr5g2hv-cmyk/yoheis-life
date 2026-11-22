@@ -11,6 +11,8 @@
 <title>Yohei's Life</title>
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon.png">
+<link rel="apple-touch-startup-image" href="splash.png" media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
+<link rel="apple-touch-startup-image" href="splash.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Exo+2:ital,wght@0,600;0,800;1,700;1,800;1,900&family=Noto+Sans+JP:wght@500;700;900&display=swap" rel="stylesheet">
@@ -23,7 +25,7 @@
   <img class="poster" id="tPoster" alt="">
   <video id="tVideo" muted playsinline autoplay loop preload="auto"></video>
   <div class="shade"></div>
-  <div class="ver">Ver : 0.4.0（見本）</div>
+  <div class="ver">Ver : 0.5.0</div>
   <div class="logo" aria-label="Yohei's Life">
     <svg viewBox="0 0 300 150">
       <defs><linearGradient id="lg" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#5BE6FF"/><stop offset=".55" stop-color="#00C8F8"/><stop offset="1" stop-color="#1E9BFF"/></linearGradient></defs>
@@ -38,9 +40,7 @@
     </svg>
   </div>
   <div class="tbtns">
-    <button class="tbtn" data-act="お知らせ">お知らせ</button>
-    <button class="tbtn" data-act="メニュー">MENU</button>
-    <button class="tbtn dark" data-act="データの設定">データの設定</button>
+    <button class="tbtn dark" data-setting>データの設定</button>
   </div>
   <div class="touch"><span>TOUCH TO START</span></div>
   <div class="copy">© Yohei's Life — for Yohei only</div>
@@ -66,9 +66,7 @@
     <div class="rs">
       <div class="c pay"><small>給料日</small><span>あと</span><span class="num" id="lvPay">23</span><span>日</span></div>
       <i class="sep"></i>
-      <div class="c"><span style="color:#F2A51A" data-ic="sun" data-s="15" data-w="2.4"></span><span class="num">18°</span></div>
-      <i class="sep"></i>
-      <div class="c"><span class="num" data-count="38200" data-pre="¥">¥0</span></div>
+      <div class="c"><small id="lvBalK">残高</small><span class="num" id="lvBal">¥—</span></div>
       <i class="sep"></i>
       <button class="snd" id="snd" aria-label="音のオン・オフ"></button>
     </div>
@@ -80,10 +78,10 @@
 
 
   <nav class="dock rise" aria-label="メニュー">
-    <button data-go="talk"><img src="ic_talk.webp" alt="">トーク<span class="badge" style="right:calc(50% - 24px);top:-10px">2</span></button>
-    <button data-go="task"><img src="ic_task.webp" alt="">タスク<i class="dot" style="right:calc(50% - 20px);top:-6px"></i></button>
-    <button data-go="plan"><img src="ic_plan.webp" alt="">予定</button>
-    <button data-go="ledger"><img src="ic_ledger.webp" alt="">台帳</button>
+    <button data-go="talk"><img src="ic_talk.webp" alt="">トーク</button>
+    <button data-go="task"><img src="ic_task.webp" alt="">タスク<span class="badge" id="bTask" hidden></span></button>
+    <button data-go="plan"><img src="ic_plan.webp" alt="">予定<span class="badge" id="bPlan" hidden></span></button>
+    <button data-go="ledger"><img src="ic_ledger.webp" alt="">台帳<span class="badge" id="bLedger" hidden></span></button>
   </nav>
 </section>
 
@@ -93,19 +91,8 @@
     <div class="bar"><h1>トーク</h1><span class="sp"></span><button class="ic" data-back data-ic="home" data-s="20" aria-label="ロビー"></button></div></div>
   <div class="slides">
     <div class="sl s1"><img class="wall" alt=""><div class="wall-fade"></div>
-      <button class="sum" data-next><i class="en">TALK</i><span>未読 2件 ・ ミカ「466円って何？」</span><b>›</b></button></div>
-    <div class="sl s2 page"><div class="in">
-    <div class="lbl rise">未読<small>2件</small></div>
-    <div class="list rise">
-      <div class="item"><img class="av" src="av_mika.webp" alt=""><div class="bd"><b>ミカ</b><small>11/21 19:29の466円って何？</small></div><span class="ub">1</span></div>
-      <div class="item"><img class="av" src="av_hoshino.webp" alt=""><div class="bd"><b>ホシノ</b><small>明日は飲みだから、お金は2千円残しといてね〜</small></div><span class="ub">1</span></div>
-    </div>
-    <div class="lbl rise">きのう</div>
-    <div class="list rise">
-      <div class="item dim"><img class="av" src="av_mika.webp" alt=""><div class="bd"><b>ミカ</b><small>おかえり、先生☆ 今日は1,240円だったよ</small></div><small class="num" style="color:var(--mute)">22:14</small></div>
-    </div>
-    <button class="more rise">前のトークを見る</button>
-  </div></div>
+      <button class="sum" data-next><i class="en">TALK</i><span id="sum-talk">読み込み中…</span><b>›</b></button></div>
+    <div class="sl s2 page"><div class="in" id="box-talk"></div></div>
   </div>
   <div class="dots"><i class="on"></i><i></i></div>
 </section>
@@ -116,17 +103,8 @@
     <div class="bar"><h1>タスク</h1><span class="sp"></span><button class="ic" data-back data-ic="home" data-s="20" aria-label="ロビー"></button></div></div>
   <div class="slides">
     <div class="sl s1"><img class="wall" alt=""><div class="wall-fade"></div>
-      <button class="sum" data-next><i class="en">TASK</i><span>今日あと2件 ・ 家賃は12/5まで</span><b>›</b></button></div>
-    <div class="sl s2 page"><div class="in">
-    <div class="kz rise"><span class="hrt">4</span><span>ミカとの絆</span><div class="gauge"><i data-to="65"></i></div><span class="num">65%</span></div>
-    <div class="lbl rise">今日<small>1 / 3</small></div>
-    <div class="list rise">
-      <div class="item"><span class="check on" data-ic="check" data-s="13" data-w="3"></span><div class="bd"><b>ミカに返事する</b><small>466円の使い道</small></div><button class="bt sm"><span>受け取り</span></button></div>
-      <div class="item"><span class="check"></span><div class="bd"><b>家賃を払う</b><small><span class="tag red">12/5まで</span></small></div><button class="bt sm"><span>払った</span></button></div>
-      <div class="item"><span class="check"></span><div class="bd"><b>洗剤を買う</b><small><span class="tag">候補 3件</span></small></div><button class="bt sm"><span>候補</span></button></div>
-    </div>
-    <button class="more rise">ほか 4件（期限つき 2件）</button>
-  </div></div>
+      <button class="sum" data-next><i class="en">TASK</i><span id="sum-task">読み込み中…</span><b>›</b></button></div>
+    <div class="sl s2 page"><div class="in" id="box-task"></div></div>
   </div>
   <div class="dots"><i class="on"></i><i></i></div>
 </section>
@@ -137,21 +115,8 @@
     <div class="bar"><h1>予定</h1><span class="sp"></span><button class="ic" data-back data-ic="home" data-s="20" aria-label="ロビー"></button></div></div>
   <div class="slides">
     <div class="sl s1"><img class="wall" alt=""><div class="wall-fade"></div>
-      <button class="sum" data-next><i class="en">NEXT</i><span>19:00 山下さんと梅田</span><b>›</b></button></div>
-    <div class="sl s2 page"><div class="in">
-    <div class="lead rise"><img src="av_hoshino.webp" alt=""><p>今日は19時から梅田だよ〜。お金は2千円残しといてね〜</p></div>
-    <div class="lbl rise">今日<small>3件</small></div>
-    <div class="list rise">
-      <div class="item"><span class="tm num">13:00</span><div class="bd"><b>洗濯と買い出し</b></div></div>
-      <div class="item"><span class="tm num">19:00</span><div class="bd"><b>山下さんと梅田</b><small><span class="tag">飲み</span></small></div></div>
-      <div class="item"><span class="tm num">23:30</span><div class="bd"><b>おやすみ電話</b><small><span class="tag gray">ミカ</span></small></div></div>
-    </div>
-    <div class="lbl rise">今週<small>2件</small></div>
-    <div class="list rise">
-      <div class="item dim"><span class="tm num">11/24</span><div class="bd"><b>歯医者 15:00</b></div></div>
-      <div class="item dim"><span class="tm num">11/27</span><div class="bd"><b>坂井さんとサシ</b></div></div>
-    </div>
-  </div></div>
+      <button class="sum" data-next><i class="en">NEXT</i><span id="sum-plan">読み込み中…</span><b>›</b></button></div>
+    <div class="sl s2 page"><div class="in" id="box-plan"></div></div>
   </div>
   <div class="dots"><i class="on"></i><i></i></div>
 </section>
@@ -162,24 +127,24 @@
     <div class="bar"><h1>台帳</h1><span class="sp"></span><button class="ic" data-back data-ic="home" data-s="20" aria-label="ロビー"></button></div></div>
   <div class="slides">
     <div class="sl s1"><img class="wall" alt=""><div class="wall-fade"></div>
-      <button class="sum" data-next><i class="en">LEDGER</i><span>残高 ¥38,200 ・ 滞納 2件</span><b>›</b></button></div>
+      <button class="sum" data-next><i class="en">LEDGER</i><span id="sum-ledger">読み込み中…</span><b>›</b></button></div>
     <div class="sl s2 page"><div class="in">
     <div class="lselect">
-      <div class="lead rise"><img src="av_mika.webp" alt=""><p>おかえり、先生☆ 何を見る？</p></div>
+      <div class="lead rise"><img src="av_mika.webp" alt=""><p id="ledLead">おかえり、先生☆ 何を見る？</p></div>
       <div class="selhead rise"><span class="en">Ledger Select</span><small>台帳</small></div>
       <div class="lcards">
         <button class="lcard rise" data-p="money"><img src="card_money.webp" alt=""><span class="lb"><i>MONEY</i><b>お金</b></span><span class="go">›</span>
           <span class="ds">残高・今月の支出・滞納・給料日。Apple Payの記録もここ</span>
-          <span class="st"><span>残高<b class="num">¥38,200</b></span><span class="red">滞納<b class="num">2件</b></span><span>給料日まで<b class="num">23日</b></span></span></button>
+          <span class="st" id="stMoney"></span></button>
         <button class="lcard rise" data-p="body"><img src="card_body.webp" alt=""><span class="lb"><i>BODY</i><b>体</b></span><span class="go">›</span>
           <span class="ds">睡眠・お酒・体調の記録。睡眠はヘルスケアから自動</span>
-          <span class="st"><span>昨夜の睡眠<b class="num">6:10</b></span><span>お酒 今週<b class="num">4日</b></span></span></button>
+          <span class="st"><span>第2弾で入ります</span></span></button>
         <button class="lcard rise" data-p="people"><img src="card_people.webp" alt=""><span class="lb"><i>PEOPLE</i><b>人</b></span><span class="go">›</span>
           <span class="ds">友達・誕生日・前に会った日。プレゼントの相談もここ</span>
-          <span class="st"><span>坂井さんの誕生日<b class="num">11日後</b></span><span>今日 山下さん</span></span></button>
+          <span class="st"><span>第2弾で入ります</span></span></button>
         <button class="lcard rise" data-p="vault"><img src="card_vault.webp" alt=""><span class="lb"><i>VAULT</i><b>金庫</b></span><span class="go">›</span>
           <span class="ds">アカウントとパスワード。開くときはロックを解除</span>
-          <span class="st"><span>登録<b class="num">12件</b></span><span>ロック中</span></span></button>
+          <span class="st"><span>第2弾で入ります</span></span></button>
         <button class="lcard rise" data-p="wall"><img src="card_wall.webp" alt=""><span class="lb"><i>WALLPAPER</i><b>壁紙</b></span><span class="go">›</span>
           <span class="ds">トーク・タスク・予定・台帳の背景。開くたびにランダム</span>
           <span class="st"><span>ホシノ<b class="num" id="wcH2">2枚</b></span><span>ミカ<b class="num" id="wcM2">2枚</b></span></span></button>
@@ -187,34 +152,10 @@
     </div>
     <div class="ldetail">
       <button class="dback" data-dback>‹ 一覧へ<span class="en" id="dTitle">Money</span></button>
-<div class="pane" id="p-money">
-      <div class="big"><div><div class="k">口座残高（推定）</div><div class="v num" data-count="38200" data-pre="¥">¥0</div></div><img src="o_mika_stand.webp" alt="ミカ"></div>
-      <div class="list" style="margin-top:8px">
-        <div class="kv"><span>今月使った</span><span class="num" data-count="41800" data-pre="¥">¥0</span></div>
-        <div class="kv"><span>給料日まで</span><span><span class="num">23</span> 日</span></div>
-        <div class="kv red"><span>滞納</span><span><span class="num">2</span> 件</span></div>
-      </div>
-    </div>
-    <div class="pane" id="p-body">
-      <div class="big"><div><div class="k">昨夜の睡眠</div><div class="v num">6:10</div></div></div>
-      <div class="list" style="margin-top:8px">
-        <div class="kv"><span>就寝・起床</span><span class="num">1:32 → 7:42</span></div>
-        <div class="kv"><span>お酒（今週）</span><span><span class="num">4</span> 日</span></div>
-      </div>
-    </div>
-    <div class="pane" id="p-people">
-      <div class="list">
-        <div class="item"><div class="bd"><b>坂井さん</b><small>誕生日 12/3・あと11日</small></div><button class="bt sm"><span>プレゼント</span></button></div>
-        <div class="item"><div class="bd"><b>山下さん</b><small>前回 11/8・今日会う</small></div></div>
-        <div class="item"><div class="bd"><b>大地</b><small>前回 9/14</small></div></div>
-      </div>
-    </div>
-    <div class="pane" id="p-vault">
-      <div class="list">
-        <div class="item"><div class="bd"><b>Google</b><small>kaninabe••••</small></div><span class="tag gray">ロック中</span></div>
-        <div class="item"><div class="bd"><b>Amazon</b><small>kaninabe••••</small></div><span class="tag gray">ロック中</span></div>
-      </div>
-    </div>
+<div class="pane" id="p-money"></div>
+    <div class="pane" id="p-body"><div class="lead"><img src="av_hoshino.webp" alt=""><p>ここは第2弾で作るよ〜。もうちょっと待っててね〜</p></div></div>
+    <div class="pane" id="p-people"><div class="lead"><img src="av_hoshino.webp" alt=""><p>ここは第2弾で作るよ〜。もうちょっと待っててね〜</p></div></div>
+    <div class="pane" id="p-vault"><div class="lead"><img src="av_hoshino.webp" alt=""><p>ここは第2弾で作るよ〜。もうちょっと待っててね〜</p></div></div>
     <div class="pane" id="p-wall">
       <div class="whdr" style="margin-top:0"><img src="av_hoshino.webp" alt="">ホシノの壁紙<small id="wcH"></small></div>
       <div class="wgrid" id="wgH"></div>
@@ -230,6 +171,7 @@
 
 <script src="ui.js"></script>
 <script src="wall.js"></script>
+<script src="sync.js"></script>
 <script src="title.js"></script>
 </body>
 </html>

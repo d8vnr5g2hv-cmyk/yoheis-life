@@ -1,5 +1,5 @@
 // ============================================================
-// Yohei's Life — タイトル → ローディング → ロビー → 各画面（見本 v0.2）
+// Yohei's Life — タイトル → ローディング → ロビー → 各画面（v0.5 GASとつなぐ）
 // ============================================================
 (async () => {
   const { $, $$, se, playBgm, playVoice, show, rise, pop, toast, paintIcons } = UI;
@@ -28,8 +28,6 @@
   setVideo($('#tVideo'), $('#tPoster'), CH[who].title);
   let started = false;
   $('#title').addEventListener('click', e => {
-    const b = e.target.closest('[data-act]');
-    if (b) { pop({ title:b.dataset.act, body:`<div class="list"><div class="item"><div class="bd"><b>見本では、まだ中身はありません</b></div></div></div>` }); return; }
     if (started) return; started = true;
     se.start(); $('.flash').classList.add('go'); playBgm('bgm_title.mp3', .4);
     setTimeout(() => show('loading').then(load), 240);
@@ -46,21 +44,21 @@
   }
 
   // ---------- ロビー ----------
-  function fillTop() {
-    const d = new Date();
-    $('#lvDate').textContent = `${d.getMonth() + 1}/${d.getDate()}`;
-    $('#lvDay').textContent = '日月火水木金土'[d.getDay()];
-    let pay = new Date(d.getFullYear(), d.getMonth(), 15); if (d.getDate() >= 15) pay = new Date(d.getFullYear(), d.getMonth() + 1, 15);
-    $('#lvPay').textContent = Math.ceil((pay - d) / 864e5);
-  }
   let toasted = false;
   function enterLobby() {
-    fillTop();
+    Sync.renderAll();
+    const got = Sync.pull(true);
     show('lobby').then(() => {
       playBgm(CH[who].bgm, .4);
-      if (!toasted) { toasted = true; setTimeout(() => toast({ who:'ミカ', av:'av_mika.webp', text:'11/21 19:29の466円って何？' }), 1500); }
+      if (!Sync.hasConf()) { setTimeout(Sync.openSetting, 700); return; }
+      Promise.resolve(got).then(st => {
+        if (toasted || !st) return; toasted = true;
+        if (st.unknown.length) setTimeout(() => toast({ who:'ミカ', av:'av_mika.webp', text:`先生、使い道がわからないのが${st.unknown.length}件あるよ☆ 台帳で教えて` }), 1200);
+      });
     });
   }
+  // アプリに戻ってきたときも読み直す
+  document.addEventListener('visibilitychange', () => { if (!document.hidden && !$('#title').classList.contains('on')) Sync.pull(); });
 
   $('#tapzone').addEventListener('click', () => {
     const c = CH[who]; playVoice(c.voice(1 + Math.floor(Math.random() * c.nv)));   // ロビーは声だけ（吹き出しなし）
@@ -77,6 +75,7 @@
     setPage(s, 1, false);
     s.querySelector('.s2').classList.remove('indetail');
     if (id === 'ledger') Wall.render();
+    Sync.pull();
     show(id, { before:() => Wall.apply($('.wall', s), Wall.pick(s.dataset.who, id)) });
   }
   // 1枚目（壁紙）⇔ 2枚目（機能）
@@ -123,6 +122,4 @@
   UI.mute(muted); paintSnd();
   $('#snd').addEventListener('click', e => { e.stopPropagation(); muted = !muted; localStorage.setItem('yl-mute', muted ? '1' : '0'); UI.mute(muted); paintSnd(); });
 
-  // チェックの切り替え（見本）
-  $$('.check').forEach(c => c.addEventListener('click', () => { c.classList.toggle('on'); if (c.classList.contains('on') && !c.innerHTML) c.innerHTML = UI.icon('check', 13, 3); }));
 })();
