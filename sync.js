@@ -24,14 +24,18 @@ const Sync = (() => {
     const r = await fetch(`${c.url}?key=${encodeURIComponent(c.key)}&a=state&t=${Date.now()}`);
     const j = await r.json(); if (j.error) throw new Error(j.error); return j;
   }
+  // 通信中は右上に小さなスピナー
+  let busyN = 0;
+  const spin = d => { busyN = Math.max(0, busyN + d); let e = document.getElementById('busy'); if (!e) { e = document.createElement('div'); e.id = 'busy'; document.body.appendChild(e); } e.classList.toggle('on', busyN > 0); };
   async function pull(force) {
     if (!conf) return null;
     if (!force && Date.now() - last < 60e3) return st;
     if (busy) return busy;
+    spin(1);
     busy = get(conf).then(j => {
       st = j; last = Date.now(); localStorage.setItem(STATE, JSON.stringify(j)); renderAll(); return j;
     }).catch(e => { if (e.message === 'key') say(HO, '合言葉が違うみたい〜。データの設定を見てね〜'); return st; })
-      .finally(() => { busy = null; });
+      .finally(() => { busy = null; spin(-1); });
     return busy;
   }
   // 画面を先に変えて、裏で送る。だめなら元に戻す
@@ -39,6 +43,7 @@ const Sync = (() => {
     if (!conf) { openSetting(); return; }
     const backup = JSON.stringify(st);
     if (change && st) { change(st); renderAll(); }
+    spin(1);
     try {
       const r = await fetch(conf.url, { method:'POST', body:JSON.stringify(Object.assign({ key:conf.key }, params)) });  // text/plainで送る（下準備の通信なし）
       const j = await r.json(); if (!j.ok) throw new Error(j.error || 'ng');
@@ -46,7 +51,7 @@ const Sync = (() => {
       setTimeout(() => pull(true), 400);
     } catch (e) {
       st = JSON.parse(backup); renderAll(); say(HO, 'うへ〜、送れなかったよ〜。電波を見てもう一回お願い〜');
-    }
+    } finally { spin(-1); }
   }
 
   // ---------- 設定 ----------
@@ -92,8 +97,8 @@ const Sync = (() => {
     if (!st) { $('#lvPay').textContent = '—'; return; }
     $('#lvPay').textContent = st.paydayIn;
     const b = $('#lvBal'), k = $('#lvBalK');
-    if (st.balance === null) { k.textContent = '今月'; b.textContent = yen(st.monthSpent); }
-    else { k.textContent = '残高'; b.textContent = yen(st.balance); b.classList.toggle('red', st.balance < 0); }
+    if (st.balance === null) { k.textContent = '今月'; UI.odo(b, yen(st.monthSpent), 'lv'); }
+    else { k.textContent = '残高'; UI.odo(b, yen(st.balance), 'lv'); b.classList.toggle('red', st.balance < 0); }
     const today = ymd(d);
     badge('#bTask', st.tasks.length);
     badge('#bPlan', st.plans.filter(p => p.t.startsWith(today)).length);
@@ -102,7 +107,9 @@ const Sync = (() => {
   function badge(sel, n) { const e = $(sel); e.hidden = !n; e.textContent = n; }
   const upd = () => st ? `<div class="upd">${esc(st.now.slice(11))} 更新</div>` : '';
   const empty = (c, t) => `<div class="lead rise"><img src="${c.av}" alt=""><p>${t}</p></div>`;
-  const noconf = () => `<div class="lead"><img src="av_hoshino.webp" alt=""><p>まだつながってないよ〜。タイトルの「データの設定」から入れてね〜</p></div><button class="bt" data-setting style="display:grid;margin:10px auto"><span>データの設定</span></button>`;
+  // 読み込み中は一覧の形を灰色で先に見せる（スケルトン）
+  const skel = (n = 4) => conf ? `<div class="skel"><i class="sk-l"></i><div class="list">${Array.from({ length:n }, () => '<div class="item"><i class="sk-c"></i><div class="bd"><i class="sk-t"></i><i class="sk-s"></i></div></div>').join('')}</div></div>` : null;
+  const noconf = () => skel() || `<div class="lead"><img src="av_hoshino.webp" alt=""><p>まだつながってないよ〜。タイトルの「データの設定」から入れてね〜</p></div><button class="bt" data-setting style="display:grid;margin:10px auto"><span>データの設定</span></button>`;
 
   // ---------- トーク（見るだけ） ----------
   function renderTalk() {
@@ -128,7 +135,7 @@ const Sync = (() => {
     if (!st) { box.innerHTML = noconf(); sum.textContent = 'データの設定をしてね'; return; }
     sum.textContent = st.tasks.length ? `残り${st.tasks.length}件 ・ ${st.tasks[0].n}` : 'やることはぜんぶ終わり！';
     let html = upd() + `<div class="lbl">やること<small>${st.tasks.length}件</small><button class="add" data-add="task" aria-label="追加">＋</button></div>`;
-    html += st.tasks.length ? `<div class="list">${st.tasks.map(r => `<div class="item"><button class="check" data-tdone="${esc(r.id)}" aria-label="完了"></button><div class="bd"><b>${esc(r.n)}</b>${r.due ? `<small><span class="tag">${md(r.due)}まで</span></small>` : ''}</div></div>`).join('')}</div>`
+    html += st.tasks.length ? `<div class="list">${st.tasks.map(r => `<div class="swr" data-sw="done" data-id="${esc(r.id)}"><div class="swbg ok">完了</div><div class="item swi"><button class="check" data-tdone="${esc(r.id)}" aria-label="完了"></button><div class="bd"><b>${esc(r.n)}</b>${r.due ? `<small><span class="tag">${md(r.due)}まで</span></small>` : ''}</div></div></div>`).join('')}</div><p class="note">左にスワイプでも完了できるよ</p>`
       : empty(HO, 'うへ〜、やることはないよ〜。LINEで「やること 〇〇」って送ってもいいよ〜');
     html += `<div class="lbl">メモ<small>${st.memo.length}件</small></div>`;
     html += st.memo.length ? `<div class="list">${st.memo.map(r => `<div class="item"><div class="bd"><b class="wrap">${esc(r.n)}</b><small class="num">${md(r.t)} ${r.t.slice(11, 16)}</small></div></div>`).join('')}</div>`
@@ -154,9 +161,9 @@ const Sync = (() => {
     Object.keys(groups).sort().forEach(d => {
       if (d > wkS && !later) { later = true; html += `<div class="lbl">その先<small>1週間前にLINEで知らせるよ</small></div>`; }
       html += `<div class="lbl sub">${d === today ? '今日' : d === tmr ? '明日' : md(d)}<small>${md(d)}（${wd(d)}）</small></div><div class="list">`;
-      html += groups[d].map(p => `<div class="item ${p.t < nowS && !isAllDay(p.t) ? 'dim' : ''}" data-plan="${esc(p.id)}"><span class="tm num">${isAllDay(p.t) ? '<small>終日</small>' : p.t.slice(11, 16)}</span><div class="bd"><b>${esc(p.n)}</b></div></div>`).join('') + '</div>';
+      html += groups[d].map(p => `<div class="swr" data-sw="delplan" data-id="${esc(p.id)}"><div class="swbg">削除</div><div class="item swi ${p.t < nowS && !isAllDay(p.t) ? 'dim' : ''}"><span class="tm num">${isAllDay(p.t) ? '<small>終日</small>' : p.t.slice(11, 16)}</span><div class="bd"><b>${esc(p.n)}</b></div></div></div>`).join('') + '</div>';
     });
-    html += '<p class="note">長押しで消せるよ</p>';
+    html += '<p class="note">左にスワイプで消せるよ</p>';
     box.innerHTML = html;
   }
 
@@ -173,12 +180,16 @@ const Sync = (() => {
     $('#ledLead').textContent = st.unknown.length ? `先生、使い道がわからないのが${st.unknown.length}件あるよ☆ お金から教えて！` : 'おかえり、先生☆ 何を見る？';
 
     let h = upd();
-    h += `<div class="big"><div><div class="k">${st.balance === null ? '今月使った' : '口座残高（推定）'}</div><div class="v num ${st.balance < 0 ? 'red' : ''}" data-count="${st.balance === null ? st.monthSpent : st.balance}" data-pre="¥">${yen(st.balance === null ? st.monthSpent : st.balance)}</div></div><img src="o_mika_stand.webp" alt="ミカ"></div>`;
+    h += `<div class="big"><div><div class="k">${st.balance === null ? '今月使った' : '口座残高（推定）'}</div><div class="v num ${st.balance < 0 ? 'red' : ''}" id="moneyBig"></div></div><img src="o_mika_stand.webp" alt="ミカ"></div>`;
     h += `<div class="list" style="margin-top:8px">
       <div class="kv"><span>今月使った</span><span class="num">${yen(st.monthSpent)}</span></div>
       <div class="kv"><span>給料日まで</span><span><span class="num">${st.paydayIn}</span> 日（${md(st.payday)}）</span></div>
       <div class="kv ${mode ? 'red' : ''}"><span>いまの段階</span><span>${mode ? '滞納を片付け中' : '先取り貯金'}</span></div>
       <div class="kv"><span>貯金</span><span class="num">${yen(st.savings)}</span></div></div>`;
+    // 30 同棲資金の水位（目標50万円）
+    const GOAL = 500000, pct = Math.min(100, Math.round(st.savings / GOAL * 1000) / 10);
+    h += `<div class="tide"><div class="tw" style="--lv:${100 - Math.max(pct, 3)}%"><svg viewBox="0 0 200 40" preserveAspectRatio="none" class="w1"><path d="M0 20 Q25 8 50 20 T100 20 T150 20 T200 20 V40 H0Z"/></svg><svg viewBox="0 0 200 40" preserveAspectRatio="none" class="w2"><path d="M0 20 Q25 30 50 20 T100 20 T150 20 T200 20 V40 H0Z"/></svg><i class="fill"></i><b class="num">${pct}<small>%</small></b></div>
+      <div class="tt"><span class="k">同棲資金</span><b class="num">${yen(st.savings)}<small> / ${yen(GOAL)}</small></b><small>${st.savings >= GOAL ? '目標達成☆' : `あと${yen(GOAL - st.savings)} ・ 来年の中ごろまで`}</small>${mode ? '<small class="muted">滞納が片付いたら、先取りでためていくよ</small>' : ''}</div></div>`;
     h += `<div class="btns"><button class="bt sm" data-m="balance"><span>残高を合わせる</span></button>${mode ? '' : '<button class="bt sm" data-m="moved"><span>先取りを移した</span></button>'}</div>`;
     if (st.unknown.length) {
       h += `<div class="lbl">何に使った？<small>${st.unknown.length}件</small></div><div class="list">` +
@@ -186,12 +197,13 @@ const Sync = (() => {
     }
     if (mode) {
       h += `<div class="lbl">滞納<small>合計 ${yen(st.arrears.reduce((s, r) => s + Number(r.a), 0))}</small></div><div class="list">` +
-        st.arrears.map(r => `<div class="item"><div class="bd"><b>${esc(r.n)}</b><small>${yen(r.a)}${r.due ? ` ・ <span class="tag red">${md(r.due)}まで</span>` : ''}</small></div><button class="bt sm" data-paid="${esc(r.id)}"><span>払った</span></button></div>`).join('') + '</div>';
+        st.arrears.map(r => `<div class="item"><div class="bd"><b>${esc(r.n)}</b><small>${yen(r.a)}${r.due ? ` ・ <span class="tag red">${md(r.due)}まで</span>` : ''}</small></div><div class="slc" data-slc="paid" data-id="${esc(r.id)}"><span class="sl-t">払った</span><span class="sk">›</span></div></div>`).join('') + '</div><p class="note">右にスライドで「払った」</p>';
     }
     h += `<div class="lbl">最近の支出<small>${st.recent.length}件</small><button class="add" data-add="exp" aria-label="追加">＋</button></div>`;
-    h += st.recent.length ? `<div class="list">${st.recent.map(r => `<button class="item row" data-exp="${esc(r.id)}"><span class="tm num">${md(r.t)}</span><div class="bd"><b>${esc(r.n)}</b><small>${esc(r.c)}${r.st === '仮' ? ' ・ 照合待ち' : ''}</small></div><span class="num amt">${yen(r.a)}</span></button>`).join('')}</div><p class="note">タップで名前の修正・削除</p>`
+    h += st.recent.length ? `<div class="list">${st.recent.map(r => `<div class="swr" data-sw="delexp" data-id="${esc(r.id)}"><div class="swbg">削除</div><button class="item row swi" data-exp="${esc(r.id)}"><span class="tm num">${md(r.t)}</span><div class="bd"><b>${esc(r.n)}</b><small>${esc(r.c)}${r.st === '仮' ? ' ・ 照合待ち' : ''}</small></div><span class="num amt">${yen(r.a)}</span></button></div>`).join('')}</div><p class="note">タップで名前の修正、左にスワイプで削除</p>`
       : '<p class="note">Apple Payで払うか、LINEで「コンビニ 466」と送るとここに出るよ</p>';
     pane.innerHTML = h;
+    UI.odo($('#moneyBig'), yen(st.balance === null ? st.monthSpent : st.balance), 'money');
   }
 
   // ---------- 台帳 › 体（睡眠） ----------
@@ -297,8 +309,10 @@ const Sync = (() => {
     let b;
     if ((b = t.closest('[data-setting]'))) { e.stopPropagation(); openSetting(); return; }
     if ((b = t.closest('[data-tdone]'))) {
-      const id = b.dataset.tdone; b.classList.add('on'); b.innerHTML = UI.icon('check', 13, 3); se.ok();
-      setTimeout(() => act({ a:'done', id }, s => { s.tasks = s.tasks.filter(x => x.id !== id); }, [HO, 'おつかれ〜、1個片付いたね〜']), 350);
+      const id = b.dataset.tdone; b.innerHTML = UI.icon('check', 13, 3); b.classList.add('on', 'draw'); se.ok();
+      const w0 = b.closest('.swr'); if (w0) w0.classList.add('strike');          // 33 文字に線を引いてから消える
+      setTimeout(() => { const w = b.closest('.swr'); if (w) w.classList.add('gone'); }, 520);
+      setTimeout(() => doneTask(id), 800);
       return;
     }
     if ((b = t.closest('[data-paid]'))) {
@@ -357,18 +371,18 @@ const Sync = (() => {
     }
   }, true);
 
-  // 予定は長押しで消す
-  let lp = null;
-  document.addEventListener('pointerdown', e => {
-    const it = e.target.closest('[data-plan]'); if (!it) return;
-    lp = setTimeout(() => {
-      const p = find(st.plans, it.dataset.plan); if (!p) return;
-      pop({ title:'予定を消す', body:`<div class="lead"><img src="av_hoshino.webp" alt=""><p>${md(p.t)} ${isAllDay(p.t) ? '' : p.t.slice(11, 16)}「${esc(p.n)}」を消すね〜？</p></div>`, buttons:[{ label:'やめる', cls:'gray' }, { label:'消す', onClick:() => {
-        act({ a:'delplan', id:p.id }, s => { s.plans = s.plans.filter(x => x.id !== p.id); }, [HO, '消しといたよ〜']);
-      } }] });
-    }, 550);
+  // 左スワイプの操作（完了・削除）
+  const doneTask = id => act({ a:'done', id }, s => { s.tasks = s.tasks.filter(x => x.id !== id); }, [HO, 'おつかれ〜、1個片付いたね〜']);
+  document.addEventListener('slideconfirm', e => {
+    const { act:k, id } = e.detail;
+    if (k === 'paid') act({ a:'paid', id }, s => { s.arrears = s.arrears.filter(x => x.id !== id); if (!s.arrears.length) s.mode = 'saving'; }, [MI, st.arrears.length > 1 ? 'えらいじゃん☆ 残りも一緒に片付けよ' : 'これで滞納ゼロだよ、先生☆']);
   });
-  ['pointerup', 'pointercancel', 'pointermove'].forEach(ev => document.addEventListener(ev, e => { if (ev !== 'pointermove' || Math.abs(e.movementY) > 3) clearTimeout(lp); }));
+  document.addEventListener('swipeact', e => {
+    const { act:k, id } = e.detail;
+    if (k === 'done') { se.ok(); doneTask(id); }
+    if (k === 'delplan') act({ a:'delplan', id }, s => { s.plans = s.plans.filter(x => x.id !== id); }, [HO, '消しといたよ〜']);
+    if (k === 'delexp') { const r = find(st.recent, id); act({ a:'delexp', id }, s => { s.recent = s.recent.filter(x => x.id !== id); s.unknown = s.unknown.filter(x => x.id !== id); if (r) { s.monthSpent -= r.a; if (s.balance !== null) s.balance += r.a; } }, [MI, '消しといたよ☆']); }
+  });
 
   renderAll();
   return { pull, renderAll, openSetting, hasConf:() => !!conf, state:() => st };

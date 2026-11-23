@@ -441,3 +441,74 @@ input[type=range]{width:100%;accent-color:var(--cyan-bar)}
 .vpw button{flex:none;padding:0 12px;font-size:13px;font-weight:700;color:#244464;background:#E4F3FB;border-radius:4px}
 .vtext{width:100%;height:120px;margin-top:8px;padding:8px;border:1px solid #D2DAE2;border-radius:4px;font:11px/1.4 monospace;color:var(--ink);background:#F7FAFC;-webkit-user-select:text;user-select:text}
 .item .go{color:var(--ink3);font-weight:900}
+
+/* ---------- v0.7.1 UIアニメ ---------- */
+/* 01 押したら少し縮んで戻る（transformと別のscaleを使うので、ほかの動きとぶつからない） */
+.bt,.chip,.dock button,.cc,.cb,.chang,.add,.check,.sum,.backbtn,.ic,.tbtn,.cb>span,.gift,.del,.vpw button{transition:scale .12s ease}
+.bt:active,.chip:active,.dock button:active,.cc:active,.chang:active,.add:active,.check:active,.backbtn:active,.ic:active,.tbtn:active,.vpw button:active{scale:.93}
+.cb:active>span{scale:.9}
+.sum:active,.gift:active{scale:.98}
+.lcard{transition:scale .14s ease}.lcard:active{scale:.98}
+.item.row{transition:background .15s}.item.row:active{background:rgba(92,208,252,.10)}
+/* 04 通信中のスピナー（右上） */
+#busy{position:fixed;z-index:60;top:calc(50px + var(--sat));right:16px;width:16px;height:16px;border-radius:50%;border:2px solid rgba(80,232,252,.25);border-top-color:#50E8FC;opacity:0;transition:opacity .25s;pointer-events:none;animation:spin .8s linear infinite}
+#busy.on{opacity:1}
+@keyframes spin{to{transform:rotate(360deg)}}
+/* 06 スケルトン（光の帯が約1秒で通る） */
+.skel i{display:block;border-radius:4px;background:linear-gradient(90deg,#E6ECF2 25%,#F5F8FB 45%,#E6ECF2 65%);background-size:300% 100%;animation:shim 1.1s linear infinite}
+.skel .sk-l{width:96px;height:14px;margin:14px 2px 8px}
+.skel .sk-c{width:20px;height:20px;border-radius:50%;flex:none}
+.skel .sk-t{width:62%;height:12px}
+.skel .sk-s{width:38%;height:9px;margin-top:6px}
+@keyframes shim{from{background-position:100% 0}to{background-position:-50% 0}}
+/* 08 チェックマーク：円がふくらんで、線を0.3秒で描く */
+.check.draw{animation:ckpop .3s cubic-bezier(.2,1.6,.4,1)}
+.check.draw path,.check.draw polyline{stroke-dasharray:24;stroke-dashoffset:24;animation:ckdraw .3s .08s ease-out forwards}
+@keyframes ckpop{0%{scale:.6}100%{scale:1}}
+@keyframes ckdraw{to{stroke-dashoffset:0}}
+/* 09 左スワイプ */
+.swr{position:relative;overflow:hidden;transition:max-height .3s ease .1s,opacity .3s ease .1s;max-height:120px}
+.swr+.swr{border-top:1px solid #EDF1F5}
+.swr .item+.item{border-top:0}
+.swr .swi{position:relative;z-index:1;background:#fff;touch-action:pan-y}
+.swbg{position:absolute;inset:0;display:flex;align-items:center;justify-content:flex-end;padding-right:18px;background:#E06C6C;color:#fff;font-size:13px;font-weight:900;letter-spacing:.1em;transition:background .15s}
+.swbg.ok{background:#3CCB7F}
+.swr.arm .swbg{background:#C84848}
+.swr.arm .swbg.ok{background:#22A964}
+.swr.gone{max-height:0;opacity:0}
+
+/* ---------- v0.7.2 29 オドメーター ---------- */
+.odo{display:inline-flex;align-items:baseline;white-space:nowrap}
+.odo .od{display:inline-block;height:1.15em;line-height:1.15em;overflow:hidden;vertical-align:bottom}
+.odo .ol{display:flex;flex-direction:column;transition:transform .7s cubic-bezier(.2,.9,.2,1)}
+.odo .ol i{display:block;height:1.15em;font-style:inherit;text-align:center}
+/* ---------- 30 同棲資金の水位 ---------- */
+.tide{display:flex;align-items:center;gap:14px;margin-top:8px;padding:12px 14px;background:rgba(255,255,255,.86);border-radius:6px;box-shadow:0 1px 0 var(--line)}
+.tw{position:relative;width:84px;height:84px;flex:none;border-radius:50%;overflow:hidden;background:#EAF6FC;box-shadow:inset 0 0 0 2px #CDEBF8}
+.tw svg{position:absolute;left:0;width:200%;height:22px;top:calc(var(--lv) - 11px);fill:#5CD0FC;animation:wave 3.2s linear infinite}
+.tw .w2{fill:#2C9CD4;opacity:.55;animation-duration:4.6s;animation-direction:reverse}
+.tw .fill{position:absolute;left:0;right:0;bottom:0;top:calc(var(--lv) + 10px);background:linear-gradient(180deg,#5CD0FC,#2C9CD4)}
+.tw b{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:1px;font-size:16px;font-weight:900;color:#143454;text-shadow:0 0 6px rgba(255,255,255,.9)}
+.tw b small{font-size:11px}
+@keyframes wave{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.tt{display:flex;flex-direction:column;gap:2px;min-width:0}
+.tt .k{font-size:11px;font-weight:700;color:var(--ink3)}
+.tt b{font-size:16px;font-weight:900;color:var(--ink)}
+.tt b small{font-size:11px;color:var(--ink3)}
+.tt>small{font-size:11px;font-weight:700;color:var(--ink2)}
+.tt>small.muted{color:var(--mute);font-weight:500}
+/* ---------- 14 スライドして確定 ---------- */
+.slc{--p:0;position:relative;flex:none;width:128px;height:34px;border-radius:17px;background:#E8EEF3;overflow:hidden;touch-action:none;user-select:none;-webkit-user-select:none}
+.slc::before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,#5CD0FC,#3CCB7F);opacity:var(--p);transition:opacity .2s}
+.slc.drag::before{transition:none}
+.slc .sl-t{position:absolute;inset:0;display:grid;place-items:center;padding-left:24px;font-size:13px;font-weight:900;color:var(--ink3);letter-spacing:.06em;opacity:calc(1 - var(--p))}
+.slc .sk{position:absolute;left:2px;top:2px;width:30px;height:30px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.18);display:grid;place-items:center;font-size:16px;font-weight:900;color:#2C9CD4;transition:transform .3s cubic-bezier(.2,.9,.2,1)}
+.slc.ok::before{opacity:1;background:#3CCB7F}
+.slc.ok .sk{color:#3CCB7F}
+.slc.ok .sl-t{opacity:1;color:#fff;padding-left:0;padding-right:30px}
+.slc.ok .sl-t::after{content:"済"}
+.slc.ok .sl-t{font-size:0}
+.slc.ok .sl-t::after{font-size:13px}
+/* ---------- 33 チェックリスト：線を引いてから消える ---------- */
+.swr.strike .bd b{background:linear-gradient(currentColor,currentColor) 0 55%/0 1.5px no-repeat;animation:strike .28s .12s ease-out forwards;color:var(--mute)}
+@keyframes strike{to{background-size:100% 1.5px}}

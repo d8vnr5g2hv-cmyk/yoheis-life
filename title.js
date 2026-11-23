@@ -114,6 +114,7 @@
     let x0 = null, y0 = 0;
     s.addEventListener('touchstart', e => { x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; }, { passive:true });
     s.addEventListener('touchend', e => {
+      if (window.__sw) return;                          // 一覧の項目をスワイプ中はページを変えない
       if (x0 === null) return; const dx = e.changedTouches[0].clientX - x0, dy = e.changedTouches[0].clientY - y0; x0 = null;
       if (Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy) * 1.3) setPage(s, dx < 0 ? 2 : 1);
     }, { passive:true });

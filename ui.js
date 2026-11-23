@@ -141,5 +141,73 @@ const UI = (() => {
     if (b && !b.closest('.scrim')) { se.tap(); sparkle(e.clientX, e.clientY); }
   }, { passive: true });
 
-  return { $, $$, icon, paintIcons, se, unlockAudio, playBgm, playVoice, mute, wipe, show, rise, countUp, pop, toast, sparkle };
+    // ---------- 左スワイプ（.swr の中の .swi を横に払うと、奥のボタンの動作） ----------
+  // 幅の40%を超えて離すと実行、足りなければバネで戻す
+  document.addEventListener('touchstart', () => {}, { passive:true });   // iPhoneで:activeを効かせる
+  let sw = null;
+  document.addEventListener('touchstart', e => {
+    const it = e.target.closest('.swi'); if (!it) return;
+    const t = e.touches[0]; sw = { it, wr:it.closest('.swr'), x:t.clientX, y:t.clientY, dx:0, on:false, dead:false };
+  }, { passive:true });
+  document.addEventListener('touchmove', e => {
+    if (!sw || sw.dead) return;
+    const t = e.touches[0], dx = t.clientX - sw.x, dy = t.clientY - sw.y;
+    if (!sw.on) {
+      if (Math.abs(dy) > 8 && Math.abs(dy) > Math.abs(dx)) { sw.dead = true; return; }   // 縦スクロールなら何もしない
+      if (dx < -8 && Math.abs(dx) > Math.abs(dy) * 1.2) { sw.on = true; window.__sw = true; sw.it.style.transition = 'none'; sw.wr.classList.add('swiping'); }
+      else return;
+    }
+    e.preventDefault();
+    sw.dx = Math.min(0, dx);
+    sw.it.style.transform = `translateX(${sw.dx}px)`;
+    sw.wr.classList.toggle('arm', -sw.dx > sw.wr.offsetWidth * .4);
+  }, { passive:false });
+  document.addEventListener('touchend', () => {
+    if (!sw) return;
+    const { it, wr, on, dx } = sw; sw = null;
+    if (!on) return;
+    setTimeout(() => { window.__sw = false; }, 60);
+    it.style.transition = 'transform .28s cubic-bezier(.2,.8,.2,1)';
+    wr.classList.remove('swiping');
+    if (-dx > wr.offsetWidth * .4) {
+      it.style.transform = 'translateX(-100%)'; wr.classList.add('gone');
+      it.addEventListener('click', ev => { ev.stopPropagation(); ev.preventDefault(); }, { capture:true, once:true });
+      setTimeout(() => document.dispatchEvent(new CustomEvent('swipeact', { detail:{ act:wr.dataset.sw, id:wr.dataset.id } })), 260);
+    } else { it.style.transform = ''; wr.classList.remove('arm'); }
+  });
+
+  // ---------- 29 数字がくるくる回る（オドメーター） ----------
+  const odoMemo = {};
+  function odo(el, text, key) {
+    key = key || el.id || 'odo'; text = String(text);
+    const prev = odoMemo[key]; odoMemo[key] = text;
+    if (prev === text && el.dataset.odo === text) return;
+    el.dataset.odo = text; el.classList.add('odo'); el.setAttribute('aria-label', text);
+    const from = (prev || '').replace(/[^0-9]/g, ''), digits = text.replace(/[^0-9]/g, '');
+    let di = 0;
+    el.innerHTML = [...text].map(c => {
+      if (!/[0-9]/.test(c)) return `<span class="oc">${c}</span>`;
+      const k = digits.length - di++, f = from.length >= k ? +from[from.length - k] : 0;
+      return `<span class="od"><span class="ol" data-to="${c}" style="transform:translateY(${-f * 10}%)">${'0123456789'.split('').map(n => `<i>${n}</i>`).join('')}</span></span>`;
+    }).join('');
+    requestAnimationFrame(() => requestAnimationFrame(() => el.querySelectorAll('.ol').forEach((l, n) => { l.style.transitionDelay = `${n * 40}ms`; l.style.transform = `translateY(${-l.dataset.to * 10}%)`; })));
+  }
+
+  // ---------- 14 スライドして確定（.slc のつまみを右端まで） ----------
+  let sl = null;
+  const slStart = (e, x) => { const k = e.target.closest('.slc .sk'); if (!k) return; const c = k.closest('.slc'); sl = { c, k, x, max:c.offsetWidth - k.offsetWidth - 4, dx:0 }; window.__sw = true; k.style.transition = 'none'; c.classList.add('drag'); };
+  const slMove = (e, x) => { if (!sl) return; if (e.cancelable) e.preventDefault(); sl.dx = Math.max(0, Math.min(sl.max, x - sl.x)); sl.k.style.transform = `translateX(${sl.dx}px)`; sl.c.style.setProperty('--p', sl.dx / sl.max); };
+  const slEnd = () => {
+    if (!sl) return; const { c, k, dx, max } = sl; sl = null; setTimeout(() => { window.__sw = false; }, 60); c.classList.remove('drag'); k.style.transition = '';
+    if (dx >= max * .92) { k.style.transform = `translateX(${max}px)`; c.classList.add('ok'); se.ok(); setTimeout(() => document.dispatchEvent(new CustomEvent('slideconfirm', { detail:{ act:c.dataset.slc, id:c.dataset.id } })), 350); }
+    else { k.style.transform = ''; c.style.setProperty('--p', 0); }
+  };
+  document.addEventListener('touchstart', e => slStart(e, e.touches[0].clientX), { passive:true });
+  document.addEventListener('touchmove', e => slMove(e, e.touches[0].clientX), { passive:false });
+  document.addEventListener('touchend', slEnd);
+  document.addEventListener('mousedown', e => slStart(e, e.clientX));
+  document.addEventListener('mousemove', e => slMove(e, e.clientX));
+  document.addEventListener('mouseup', slEnd);
+
+return { $, $$, icon, paintIcons, se, unlockAudio, playBgm, odo, playVoice, mute, wipe, show, rise, countUp, pop, toast, sparkle };
 })();
