@@ -89,7 +89,7 @@ const Wx = (() => {
     if (Math.abs(jump) >= 7) L.push(H ? `昨日より${Math.abs(jump)}°も${jump > 0 ? 'あつい' : 'さむい'}から、服で調整してね〜。` : `昨日より${Math.abs(jump)}°も${jump > 0 ? '暑い' : '寒い'}から、服で調整してね！`);
     else if (d.min <= 5) L.push(H ? 'おじさん寒いのは苦手だよ〜。あったかくしてね〜。' : '朝と夜はかなり冷えるから、マフラーもあると安心だよ');
     if (L.length === 1) L.push(H ? (d.code <= 2 ? 'お昼寝日和だねえ〜。うへ〜。' : 'すっきりしない空だけど、のんびりいこ〜。') : (d.code <= 2 ? '気持ちいい一日になりそう☆ 先生も楽しんでね！' : 'すっきりしない空だけど、私がついてるじゃんね☆'));
-    return { who, face, src:`wx_${who}_${face}.webp`, fb:`wx_${who}_n.webp`, fb2:FALL[who], name:H ? 'HOSHINO' : 'MIKA', line:L.slice(0, 3).join(''), chips:ch };
+    return { who, face, src:`wx_${who}_n.webp`, fb:`wx_${who}_n.webp`, fb2:FALL[who], name:H ? 'HOSHINO' : 'MIKA', line:L.slice(0, 3).join(''), chips:ch };
   }
 
   // ---------- 画面 ----------
