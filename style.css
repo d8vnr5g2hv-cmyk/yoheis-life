@@ -517,7 +517,7 @@ input[type=range]{width:100%;accent-color:var(--cyan-bar)}
 /* ---------- v0.8 お天気スタジオ ---------- */
 #weather{background:#CFE6FF}
 .wx{position:absolute;inset:0;overflow:hidden;color:var(--ink)}
-.wx-bg{position:absolute;inset:0;background:url(wx_studio.webp) left center/cover}
+.wx-bg{position:absolute;inset:0;background:url(wx_studio.webp) left center/cover;transform:scaleX(-1)}
 .wx-bg::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.15),rgba(255,255,255,0) 40%,rgba(20,60,110,.25))}
 .wx-top{position:absolute;left:14px;right:14px;top:calc(14px + var(--sat));display:flex;justify-content:space-between;align-items:flex-end}
 .wx-top em{display:block;font:italic 800 11px "Exo 2",var(--jp);letter-spacing:.3em;color:#2C9CD4}
