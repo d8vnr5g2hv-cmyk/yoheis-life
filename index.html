@@ -25,7 +25,7 @@
   <div class="tart"><img id="tSleep" alt=""><img id="tWake" alt=""></div>
   <div class="tfx" id="tFx"><i class="tsweep"></i></div>
   <div class="shade"></div>
-  <div class="ver">Ver : 0.5.1</div>
+  <div class="ver">Ver : 0.7.0</div>
   <div class="logo" aria-label="Yohei's Life">
     <svg viewBox="0 0 300 150">
       <defs><linearGradient id="lg" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#5BE6FF"/><stop offset=".55" stop-color="#00C8F8"/><stop offset="1" stop-color="#1E9BFF"/></linearGradient></defs>
@@ -72,6 +72,7 @@
     </div>
   </div>
   <div class="tools rise">
+    <button class="chip" data-call aria-label="おやすみ電話"><span data-ic="phone" data-s="13" data-w="2.4"></span></button>
     <button class="chip" id="swap" aria-label="キャラを切り替え">1/2</button>
     <button class="chip" data-expand aria-label="絵だけ表示"><span data-ic="expand" data-s="14" data-w="2.6"></span></button>
   </div>
@@ -137,14 +138,14 @@
           <span class="ds">残高・今月の支出・滞納・給料日。Apple Payの記録もここ</span>
           <span class="st" id="stMoney"></span></button>
         <button class="lcard rise" data-p="body"><img src="card_body.webp" alt=""><span class="lb"><i>BODY</i><b>体</b></span><span class="go">›</span>
-          <span class="ds">睡眠・お酒・体調の記録。睡眠はヘルスケアから自動</span>
-          <span class="st"><span>第2弾で入ります</span></span></button>
+          <span class="ds">睡眠の記録。寝た時刻はおやすみ電話・夜の充電、起きた時刻はアラームから自動</span>
+          <span class="st" id="stBody"><span>記録待ち</span></span></button>
         <button class="lcard rise" data-p="people"><img src="card_people.webp" alt=""><span class="lb"><i>PEOPLE</i><b>人</b></span><span class="go">›</span>
-          <span class="ds">友達・誕生日・前に会った日。プレゼントの相談もここ</span>
-          <span class="st"><span>第2弾で入ります</span></span></button>
+          <span class="ds">友達・家族の誕生日と好きなもの。1か月前にホシノがプレゼントを相談</span>
+          <span class="st" id="stPeople"><span>未登録</span></span></button>
         <button class="lcard rise" data-p="vault"><img src="card_vault.webp" alt=""><span class="lb"><i>VAULT</i><b>金庫</b></span><span class="go">›</span>
-          <span class="ds">アカウントとパスワード。開くときはロックを解除</span>
-          <span class="st"><span>第2弾で入ります</span></span></button>
+          <span class="ds">会員番号や控え。この端末の中だけに暗証番号で鍵をかけて保存</span>
+          <span class="st" id="stVault"><span>未設定</span></span></button>
         <button class="lcard rise" data-p="wall"><img src="card_wall.webp" alt=""><span class="lb"><i>WALLPAPER</i><b>壁紙</b></span><span class="go">›</span>
           <span class="ds">トーク・タスク・予定・台帳の背景。開くたびにランダム</span>
           <span class="st"><span>ホシノ<b class="num" id="wcH2">2枚</b></span><span>ミカ<b class="num" id="wcM2">2枚</b></span></span></button>
@@ -153,9 +154,9 @@
     <div class="ldetail">
       <button class="dback" data-dback>‹ 一覧へ<span class="en" id="dTitle">Money</span></button>
 <div class="pane" id="p-money"></div>
-    <div class="pane" id="p-body"><div class="lead"><img src="av_hoshino.webp" alt=""><p>ここは第2弾で作るよ〜。もうちょっと待っててね〜</p></div></div>
-    <div class="pane" id="p-people"><div class="lead"><img src="av_hoshino.webp" alt=""><p>ここは第2弾で作るよ〜。もうちょっと待っててね〜</p></div></div>
-    <div class="pane" id="p-vault"><div class="lead"><img src="av_hoshino.webp" alt=""><p>ここは第2弾で作るよ〜。もうちょっと待っててね〜</p></div></div>
+    <div class="pane" id="p-body"></div>
+    <div class="pane" id="p-people"></div>
+    <div class="pane" id="p-vault"></div>
     <div class="pane" id="p-wall">
       <div class="whdr" style="margin-top:0"><img src="av_hoshino.webp" alt="">ホシノの壁紙<small id="wcH"></small></div>
       <div class="wgrid" id="wgH"></div>
@@ -169,9 +170,30 @@
   <div class="dots"><i class="on"></i><i></i></div>
 </section>
 
+
+<!-- ===== おやすみ電話 ===== -->
+<section id="call" class="screen" aria-label="おやすみ電話">
+  <div class="cbg"><img id="cBg" alt=""></div>
+  <div class="ctop">
+    <span class="clabel">GOOD NIGHT CALL</span>
+    <b id="cName"></b>
+    <span class="ctime num" id="cTime"></span>
+  </div>
+  <div class="cfig"><div class="cring"><i></i><i></i><i></i></div><img id="cFace" alt=""></div>
+  <div class="cbox" id="cBox"><span class="cwho" id="cWho"></span><p id="cText"></p><div class="cch" id="cCh"></div><i class="cdots"><b></b><b></b><b></b></i><span class="cnext">▼</span></div>
+  <div class="cbtns">
+    <button class="cb no" data-cno><span><span data-ic="x" data-s="24" data-w="2.6"></span></span>あとで</button>
+    <button class="cb yes" data-cyes><span><span data-ic="phone" data-s="24" data-w="2.4"></span></span>出る</button>
+  </div>
+  <button class="chang" data-chang aria-label="電話を切る"><span data-ic="phone" data-s="22" data-w="2.4"></span></button>
+  <div class="cend" id="cEnd"><p id="cEndT">おやすみ、先生</p><small class="num" id="cDur"></small></div>
+</section>
+
 <script src="ui.js"></script>
 <script src="wall.js"></script>
 <script src="sync.js"></script>
+<script src="call.js"></script>
+<script src="vault.js"></script>
 <script src="title.js"></script>
 </body>
 </html>

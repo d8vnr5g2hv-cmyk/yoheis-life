@@ -27,6 +27,7 @@ const UI = (() => {
     up:'<path d="M6 15l6-6 6 6"/>',
     sound:'<path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16 9a4 4 0 010 6M18.5 6.5a8 8 0 010 11"/>',
     mute:'<path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M17 9l5 6M22 9l-5 6"/>',
+    lock:'<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',
     s:'<path d="M16 6.5C15 5 13.6 4.3 12 4.3c-2.4 0-4 1.3-4 3.2 0 4.4 8.4 2.6 8.4 7.4 0 2.3-1.9 3.8-4.6 3.8-1.9 0-3.6-.8-4.6-2.3"/>',
   };
   const icon = (n, s = 24, w = 2.2) => `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${P[n] || ''}</svg>`;
@@ -68,7 +69,7 @@ const UI = (() => {
   }
   function fadeTo(a, v, ms, done) {
     const s = a.volume, t0 = performance.now();
-    (function step(t) { const k = Math.min(1, (t - t0) / ms); a.volume = s + (v - s) * k; k < 1 ? requestAnimationFrame(step) : done && done(); })(t0);
+    (function step(t) { const k = Math.min(1, (t - t0) / ms); a.volume = Math.min(1, Math.max(0, s + (v - s) * k)); k < 1 ? requestAnimationFrame(step) : done && done(); })(t0);
   }
   let voice = null;
   function playVoice(src) { if (muted) return; try { voice && voice.pause(); voice = new Audio(src); voice.volume = .9; voice.play().catch(() => {}); } catch (e) {} }

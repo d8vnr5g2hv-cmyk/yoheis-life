@@ -66,13 +66,20 @@
       playBgm(CH[who].bgm, .4);
       if (!Sync.hasConf()) { setTimeout(Sync.openSetting, 700); return; }
       Promise.resolve(got).then(st => {
+        if (st && st.call && st.call.ring) { setTimeout(() => Call.incoming(st.call.who), 900); return; }   // 充電で呼ばれていたら着信
         if (toasted || !st) return; toasted = true;
         if (st.unknown.length) setTimeout(() => toast({ who:'ミカ', av:'av_mika.webp', text:`先生、使い道がわからないのが${st.unknown.length}件あるよ☆ 台帳で教えて` }), 1200);
       });
     });
   }
   // アプリに戻ってきたときも読み直す
-  document.addEventListener('visibilitychange', () => { if (!document.hidden && !$('#title').classList.contains('on')) Sync.pull(); });
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden || $('#title').classList.contains('on')) return;
+    Promise.resolve(Sync.pull(true)).then(st => { if (st && st.call && st.call.ring && $('#lobby').classList.contains('on')) Call.incoming(st.call.who); });
+  });
+  // おやすみ電話：ロビーのボタンでこちらからかける／終わったらロビーの曲に戻す
+  document.addEventListener('click', e => { if (e.target.closest('[data-call]')) { const st = Sync.state(); Call.dial(st && st.call ? st.call.who : Call.tonight()); } });
+  window.addEventListener('callend', () => { playBgm(CH[who].bgm, .4); Sync.pull(true); });
 
   $('#tapzone').addEventListener('click', () => {
     const c = CH[who]; playVoice(c.voice(1 + Math.floor(Math.random() * c.nv)));   // ロビーは声だけ（吹き出しなし）

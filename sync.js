@@ -145,10 +145,14 @@ const Sync = (() => {
     const next = st.plans.find(p => p.t >= nowS || (p.t.startsWith(today) && isAllDay(p.t)));
     sum.textContent = next ? `${next.t.startsWith(today) ? '' : md(next.t) + ' '}${isAllDay(next.t) ? '' : next.t.slice(11, 16) + ' '}${next.n}` : '1週間、予定なし';
     const tm = new Date(now); tm.setDate(tm.getDate() + 1); const tmr = ymd(tm);
+    const wk = new Date(now); wk.setDate(wk.getDate() + 7); const wkS = ymd(wk);
     const groups = {}; st.plans.forEach(p => (groups[p.t.slice(0, 10)] = groups[p.t.slice(0, 10)] || []).push(p));
-    let html = upd() + `<div class="lbl">この1週間<small>${st.plans.length}件</small><button class="add" data-add="plan" aria-label="追加">＋</button></div>`;
-    if (!st.plans.length) html += empty(HO, '1週間、予定なしだよ〜。のんびりできるね〜');
+    const near = st.plans.filter(p => p.t.slice(0, 10) <= wkS).length;
+    let html = upd() + `<div class="lbl">この1週間<small>${near}件</small><button class="add" data-add="plan" aria-label="追加">＋</button></div>`;
+    if (!near) html += empty(HO, '1週間、予定なしだよ〜。のんびりできるね〜');
+    let later = false;
     Object.keys(groups).sort().forEach(d => {
+      if (d > wkS && !later) { later = true; html += `<div class="lbl">その先<small>1週間前にLINEで知らせるよ</small></div>`; }
       html += `<div class="lbl sub">${d === today ? '今日' : d === tmr ? '明日' : md(d)}<small>${md(d)}（${wd(d)}）</small></div><div class="list">`;
       html += groups[d].map(p => `<div class="item ${p.t < nowS && !isAllDay(p.t) ? 'dim' : ''}" data-plan="${esc(p.id)}"><span class="tm num">${isAllDay(p.t) ? '<small>終日</small>' : p.t.slice(11, 16)}</span><div class="bd"><b>${esc(p.n)}</b></div></div>`).join('') + '</div>';
     });
@@ -190,7 +194,101 @@ const Sync = (() => {
     pane.innerHTML = h;
   }
 
-  function renderAll() { renderLobby(); renderTalk(); renderTask(); renderPlan(); renderLedger(); }
+  // ---------- 台帳 › 体（睡眠） ----------
+  const hm = m => `${Math.floor(m / 60)}時間${String(m % 60).padStart(2, '0')}分`;
+  const hmS = m => `${Math.floor(m / 60)}:${String(m % 60).padStart(2, '0')}`;
+  const clk = m => { m = ((m % 1440) + 1440) % 1440; return `${Math.floor(m / 60)}:${String(m % 60).padStart(2, '0')}`; };
+  const toMin = t => { const [h, m] = t.slice(11, 16).split(':').map(Number); return (h < 12 ? h + 24 : h) * 60 + m; };
+  const SRC = { call:'電話を切った', charge:'充電した' };
+  function renderBody() {
+    const pane = $('#p-body'), stc = $('#stBody');
+    if (!st) { pane.innerHTML = noconf(); stc.innerHTML = '<span>未設定</span>'; return; }
+    const b = st.body || { week:[] }, l = b.last;
+    stc.innerHTML = l && l.min ? `<span>昨夜<b class="num">${hmS(l.min)}</b></span>${b.avgMin ? `<span>平均<b class="num">${hmS(b.avgMin)}</b></span>` : ''}` : '<span>記録待ち</span>';
+    let h = upd();
+    if (!l) {
+      pane.innerHTML = h + empty(MI, 'まだ記録がないよ。夜に充電するか、おやすみ電話を切ると「寝た時刻」、朝アラームを止めると「起きた時刻」が入るよ☆');
+      return;
+    }
+    const msg = !l.wake ? 'いまは寝た時刻まで入ってるよ。起きたらアラームを止めてね☆'
+      : l.min < 360 ? '昨夜はちょっと短めだったね……。今夜は早めに寝よ？'
+      : l.min >= 480 ? 'しっかり寝れたね☆ えらいえらい。'
+      : 'ちゃんと寝れてるね☆ この調子！';
+    h += empty(MI, msg);
+    h += `<div class="big"><div><div class="k">昨夜の睡眠</div><div class="v num">${l.wake ? hm(l.min) : '記録中'}</div></div><img src="o_mika_stand.webp" alt="ミカ"></div>`;
+    h += `<div class="list" style="margin-top:8px">
+      <div class="kv"><span>寝た時刻</span><span><span class="num">${l.bed ? l.bed.slice(11) : '—'}</span>${l.src ? `<small>（${SRC[l.src] || ''}）</small>` : ''}</span></div>
+      <div class="kv"><span>起きた時刻</span><span class="num">${l.wake ? l.wake.slice(11) : '—'}</span></div>
+      ${b.week.length ? `<div class="kv"><span>1週間の平均</span><span class="num">${hm(b.avgMin)}</span></div>
+      <div class="kv"><span>平均の寝た時刻／起きた時刻</span><span class="num">${clk(b.avgBed)} → ${clk(b.avgWake)}</span></div>` : ''}</div>`;
+    if (b.week.length) {
+      const S = 21 * 60, W = 15 * 60;                 // 21時〜翌12時の帯
+      h += `<div class="lbl">この1週間<small>21時〜12時</small></div><div class="list slp">
+        <div class="sax"><span></span><i style="left:20%">0時</i><i style="left:40%">3時</i><i style="left:60%">6時</i><i style="left:80%">9時</i></div>` +
+        b.week.slice().reverse().map(r => {
+          const a = Math.max(0, toMin(r.bed) - S), z = Math.min(W, toMin(r.wake) - S);
+          return `<div class="srow"><span class="sd num">${md(r.night)}<small>${wd(r.night)}</small></span><span class="str"><i style="left:${a / W * 100}%;width:${Math.max(2, (z - a) / W * 100)}%" class="${r.min < 360 ? 'short' : ''}"></i></span><span class="sm num">${hmS(r.min)}</span></div>`;
+        }).join('') + '</div>';
+    }
+    pane.innerHTML = h;
+  }
+
+  // ---------- 台帳 › 人 ----------
+  function renderPeople() {
+    const pane = $('#p-people'), stc = $('#stPeople');
+    if (!st) { pane.innerHTML = noconf(); stc.innerHTML = '<span>未設定</span>'; return; }
+    const ps = st.people || [], nx = ps.find(p => p.days != null);
+    stc.innerHTML = nx ? `<span>${esc(nx.name)}の誕生日まで<b class="num">${nx.days}日</b></span>` : `<span>登録<b class="num">${ps.length}人</b></span>`;
+    let h = upd();
+    h += empty(HO, nx && nx.days <= 30 ? `${esc(nx.name)}の誕生日まで、あと${nx.days}日だよ〜。` : '誕生日と好きなものを入れておくと、1か月前におじさんがプレゼントの相談するよ〜');
+    h += `<div class="lbl">人<small>${ps.length}人</small><button class="add" data-person="" aria-label="追加">＋</button></div>`;
+    h += ps.length ? `<div class="list">${ps.map(p => `<button class="item row" data-person="${esc(p.id)}">
+        <span class="pday ${p.days != null && p.days <= 30 ? 'soon' : ''}">${p.days == null ? '<small>—</small>' : p.days === 0 ? '<b>今日</b>' : `<b class="num">${p.days}</b><small>日後</small>`}</span>
+        <div class="bd"><b>${esc(p.name)}${p.rel ? `<span class="tag">${esc(p.rel)}</span>` : ''}</b><small>${p.bday ? `誕生日 ${esc(p.bday.replace(/^0/, '').replace('/0', '/'))}` : '誕生日 未登録'}${p.likes ? ' ・ ' + esc(p.likes) : ''}</small>
+        <small>${p.since == null ? '会った記録なし' : p.since === 0 ? '今日会った' : `最後に会ってから ${p.since}日`}</small></div></button>`).join('')}</div>`
+      : '<p class="note">「＋」から登録してね</p>';
+    pane.innerHTML = h;
+  }
+  function personForm(p) {
+    p = p || {};
+    const [bm, bd] = (p.bday || '').split('/');
+    const d = form(p.id ? p.name : '人を追加', [
+      { k:'name', label:'名前', value:p.name, ph:'坂井さん' },
+      { k:'rel', label:'関係', value:p.rel, ph:'友達・家族・会社など' },
+      { k:'bm', label:'誕生日（月）', type:'number', value:bm ? +bm : '', ph:'3' },
+      { k:'bd', label:'誕生日（日）', type:'number', value:bd ? +bd : '', ph:'14' },
+      { k:'likes', label:'好きなもの（「、」区切り。プレゼント探しに使う）', value:p.likes, ph:'ビール、サッカー' },
+      { k:'memo', label:'メモ', value:p.memo, ph:'' },
+    ], p.id ? '保存' : '追加', v => {
+      if (!v.name) return false;
+      const bday = v.bm && v.bd ? `${pad(+v.bm)}/${pad(+v.bd)}` : '';
+      act({ a:'person', id:p.id || '', name:v.name, rel:v.rel, bday, likes:v.likes, memo:v.memo }, null, [HO, p.id ? '直しといたよ〜' : `${v.name}、入れといたよ〜`]);
+    }, p.id ? `<div class="btns"><button class="bt sm" data-pmet><span>今日会った</span></button><button class="bt sm" data-pgift><span>プレゼントを探す</span></button></div><button class="del" data-pdel>この人を消す</button>` : '');
+    if (!p.id) return;
+    $('[data-pmet]', d).addEventListener('click', () => { d.close(); act({ a:'met', id:p.id }, s => { const x = find(s.people, p.id); if (x) x.since = 0; }, [HO, `${p.name}と会ったんだね〜。記録しといたよ〜`]); });
+    $('[data-pdel]', d).addEventListener('click', () => { d.close(); act({ a:'delperson', id:p.id }, s => { s.people = s.people.filter(x => x.id !== p.id); }, [HO, '消しといたよ〜']); });
+    $('[data-pgift]', d).addEventListener('click', () => { d.close(); giftForm(p); });
+  }
+  function giftForm(p) {
+    form(`${p.name}へのプレゼント`, [{ k:'budget', label:`予算（円）${p.likes ? ' ・ 好きなもの：' + p.likes : ''}`, type:'number', ph:'3000' }], '探す', (v, dlg) => {
+      const b = Number(v.budget); if (!b) return false;
+      const msg = document.createElement('p'); msg.className = 'note'; msg.textContent = '楽天で探しています…'; dlg.querySelector('.pop').appendChild(msg);
+      fetch(conf.url, { method:'POST', body:JSON.stringify({ key:conf.key, a:'gift', id:p.id, budget:b }) }).then(r => r.json()).then(j => {
+        dlg.close();
+        if (!j.ok || !j.items.length) { say(HO, j.error || 'うへ〜、いいのが見つからなかったよ〜。予算を変えてみて〜'); return; }
+        pop({ title:'プレゼントの候補', body:`<div class="lead"><img src="av_hoshino.webp" alt=""><p>「${esc(j.kw.join('・'))}」から${yen(b)}以内で探してみたよ〜</p></div><div class="gifts">${j.items.map(it => `<a class="gift" href="${esc(it.url)}" target="_blank" rel="noopener"><img src="${esc(it.img)}" alt=""><span><b>${esc(it.name)}</b><small class="num">${yen(it.price)}${it.count ? ` ・ ★${it.review}` : ''}</small></span></a>`).join('')}</div>` });
+      }).catch(() => { msg.textContent = '通信できなかった…もう一回お願い'; msg.classList.add('ng'); });
+      return false;
+    });
+  }
+  document.addEventListener('click', e => {
+    const b = e.target.closest('[data-person]'); if (!b) return;
+    e.stopPropagation();
+    if (!conf) { openSetting(); return; }
+    personForm(b.dataset.person ? find(st.people || [], b.dataset.person) : null);
+  }, true);
+
+  function renderAll() { renderLobby(); renderTalk(); renderTask(); renderPlan(); renderLedger(); renderBody(); renderPeople(); }
 
   // ---------- 操作 ----------
   const find = (list, id) => list.find(x => x.id === id);
