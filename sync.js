@@ -199,6 +199,16 @@ const Sync = (() => {
       h += `<div class="lbl">滞納<small>合計 ${yen(st.arrears.reduce((s, r) => s + Number(r.a), 0))}</small></div><div class="list">` +
         st.arrears.map(r => `<div class="item"><div class="bd"><b>${esc(r.n)}</b><small>${yen(r.a)}${r.due ? ` ・ <span class="tag red">${md(r.due)}まで</span>` : ''}</small></div><div class="slc" data-slc="paid" data-id="${esc(r.id)}"><span class="sl-t">払った</span><span class="sk">›</span></div></div>`).join('') + '</div><p class="note">右にスライドで「払った」</p>';
     }
+    // サブスク（アプリで登録・毎月「使った？」を聞く・2か月使ってなければ解約を提案）
+    const subs = st.subs || [], sym = st.subsYm, smon = sym ? +sym.slice(5) : 0;
+    const prevYm = sym ? (() => { const d = new Date(sym + '-01T00:00:00'); d.setMonth(d.getMonth() - 1); return `${d.getFullYear()}-${pad(d.getMonth() + 1)}`; })() : '';
+    h += `<div class="lbl">サブスク<small>毎月 ${yen(subs.reduce((s, x) => s + Number(x.price || 0), 0))}</small><button class="add" data-sub="" aria-label="追加">＋</button></div>`;
+    const ask = subs.filter(x => !(x.use || {})[sym] && (x.start || '') <= sym);
+    if (ask.length) h += `<div class="subask"><b>${smon}月、使った？</b>${ask.map(x => `<div class="sa"><span>${esc(x.name)}</span><button class="bt sm" data-subuse="${esc(x.id)}" data-v="yes"><span>使った</span></button><button class="bt sm gray" data-subuse="${esc(x.id)}" data-v="no"><span>使ってない</span></button></div>`).join('')}</div>`;
+    h += subs.length ? `<div class="list">${subs.map(x => {
+      const u = x.use || {}, two = u[sym] === 'no' && u[prevYm] === 'no', one = u[sym] === 'no';
+      return `<button class="item row" data-sub="${esc(x.id)}"><span class="tm num">${x.day}日</span><div class="bd"><b>${esc(x.name)}${two ? '<span class="tag red">解約しよ</span>' : one ? '<span class="tag">先月使ってない</span>' : ''}</b><small>毎月 ${yen(x.price)}</small></div><span class="num amt">${yen(x.price)}</span></button>`;
+    }).join('')}</div>` : '<p class="note">「＋」から登録すると、毎月「使った？」を聞いて、2か月使ってなければ解約を提案するよ</p>';
     h += `<div class="lbl">最近の支出<small>${st.recent.length}件</small><button class="add" data-add="exp" aria-label="追加">＋</button></div>`;
     h += st.recent.length ? `<div class="list">${st.recent.map(r => `<div class="swr" data-sw="delexp" data-id="${esc(r.id)}"><div class="swbg">削除</div><button class="item row swi" data-exp="${esc(r.id)}"><span class="tm num">${md(r.t)}</span><div class="bd"><b>${esc(r.n)}</b><small>${esc(r.c)}${r.st === '仮' ? ' ・ 照合待ち' : ''}</small></div><span class="num amt">${yen(r.a)}</span></button></div>`).join('')}</div><p class="note">タップで名前の修正、左にスワイプで削除</p>`
       : '<p class="note">Apple Payで払うか、LINEで「コンビニ 466」と送るとここに出るよ</p>';
@@ -377,6 +387,22 @@ const Sync = (() => {
     const { act:k, id } = e.detail;
     if (k === 'paid') act({ a:'paid', id }, s => { s.arrears = s.arrears.filter(x => x.id !== id); if (!s.arrears.length) s.mode = 'saving'; }, [MI, st.arrears.length > 1 ? 'えらいじゃん☆ 残りも一緒に片付けよ' : 'これで滞納ゼロだよ、先生☆']);
   });
+  document.addEventListener('click', e => {
+    const u = e.target.closest('[data-subuse]');
+    if (u) { e.stopPropagation(); const id = u.dataset.subuse, v = u.dataset.v; act({ a:'subuse', id, ym:st.subsYm, v }, s => { const x = find(s.subs, id); if (x) { x.use = x.use || {}; x.use[s.subsYm] = v; } }, v === 'yes' ? [MI, '使ってるならOK☆'] : [MI, '了解。2か月続いたら解約を考えよ☆']); return; }
+    const b = e.target.closest('[data-sub]'); if (!b) return;
+    e.stopPropagation(); if (!conf) { openSetting(); return; }
+    const x = b.dataset.sub ? find(st.subs || [], b.dataset.sub) : {};
+    const d = form(x.id ? x.name : 'サブスクを追加', [
+      { k:'name', label:'名前', value:x.name, ph:'Netflix' },
+      { k:'price', label:'毎月の金額（円）', type:'number', value:x.price, ph:'1490' },
+      { k:'day', label:'引き落とし日（毎月◯日）', type:'number', value:x.day, ph:'5' },
+    ], x.id ? '保存' : '追加', v => {
+      if (!v.name || !Number(v.price)) return false;
+      act({ a:'sub', id:x.id || '', name:v.name, price:v.price, day:v.day || 1 }, null, [MI, x.id ? '直しといたよ☆' : `${v.name}、入れといたよ☆`]);
+    }, x.id ? '<button class="del" data-subdel>このサブスクを消す（解約したとき）</button>' : '');
+    if (x.id) $('[data-subdel]', d).addEventListener('click', () => { d.close(); act({ a:'delsub', id:x.id }, s => { s.subs = s.subs.filter(y => y.id !== x.id); }, [MI, `${x.name}、一覧から消したよ。解約えらい☆`]); });
+  }, true);
   document.addEventListener('swipeact', e => {
     const { act:k, id } = e.detail;
     if (k === 'done') { se.ok(); doneTask(id); }

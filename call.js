@@ -105,6 +105,7 @@ const Call = (() => {
     who = w || tonight();
     const sets = IMG[who]; face = sets[Math.floor(Math.random() * sets.length)];
     $('#cBg').src = BG[who]; $('#cFace').src = face[0];
+    $('#cFace').onerror = function () { this.onerror = null; this.src = who === 'mika' ? 'o_mika_stand.webp' : 'av_hoshino.webp'; };   // 絵が見つからないときの保険
     $('#cName').textContent = NAME[who]; $('#cWho').textContent = SHORT[who];
     $('#cText').textContent = ''; $('#cCh').innerHTML = ''; $('#cBox').className = 'cbox';
     $('#cEnd').classList.remove('on');

@@ -54,12 +54,13 @@
     $('#lImg').src = img; $('#lTip').textContent = line;
     setVideo($('#lbVideo'), $('#lbPoster'), c.lobby);
     const bar = $('#lBar'), t0 = performance.now(), ms = 1800;
-    (function step(t) { const k = Math.min(1, (t - t0) / ms); bar.style.width = (k * 100) + '%'; k < 1 ? requestAnimationFrame(step) : wallReady.then(enterLobby); })(t0);
+    (function step(t) { const k = Math.min(1, (t - t0) / ms); bar.style.width = (k * 100) + '%'; k < 1 ? requestAnimationFrame(step) : wallReady.then(() => Wx.due() ? Wx.show(enterLobby) : enterLobby()); })(t0);   // その日最初はお天気から
   }
 
   // ---------- ロビー ----------
   let toasted = false;
   function enterLobby() {
+    Wx.chip();
     Sync.renderAll();
     const got = Sync.pull(true);
     show('lobby').then(() => {

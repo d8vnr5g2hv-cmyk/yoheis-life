@@ -25,7 +25,7 @@
   <div class="tart"><img id="tSleep" alt=""><img id="tWake" alt=""></div>
   <div class="tfx" id="tFx"><i class="tsweep"></i></div>
   <div class="shade"></div>
-  <div class="ver">Ver : 0.7.2</div>
+  <div class="ver">Ver : 0.8.0</div>
   <div class="logo" aria-label="Yohei's Life">
     <svg viewBox="0 0 300 150">
       <defs><linearGradient id="lg" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#5BE6FF"/><stop offset=".55" stop-color="#00C8F8"/><stop offset="1" stop-color="#1E9BFF"/></linearGradient></defs>
@@ -66,6 +66,7 @@
     <div class="rs">
       <div class="c pay"><small>給料日</small><span>あと</span><span class="num" id="lvPay">23</span><span>日</span></div>
       <i class="sep"></i>
+      <div class="c wxc" id="lvWx" hidden></div>
       <div class="c"><small id="lvBalK">残高</small><span class="num" id="lvBal">¥—</span></div>
       <i class="sep"></i>
       <button class="snd" id="snd" aria-label="音のオン・オフ"></button>
@@ -171,6 +172,9 @@
 </section>
 
 
+<!-- ===== お天気スタジオ ===== -->
+<section id="weather" class="screen" aria-label="今日の天気"><div class="wx" id="wxBox"></div></section>
+
 <!-- ===== おやすみ電話 ===== -->
 <section id="call" class="screen" aria-label="おやすみ電話">
   <div class="cbg"><img id="cBg" alt=""></div>
@@ -194,6 +198,7 @@
 <script src="sync.js"></script>
 <script src="call.js"></script>
 <script src="vault.js"></script>
+<script src="weather.js"></script>
 <script src="title.js"></script>
 </body>
 </html>

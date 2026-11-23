@@ -354,7 +354,8 @@ input[type=range]{width:100%;accent-color:var(--cyan-bar)}
 /* ---------- v0.6 おやすみ電話 ---------- */
 #call{background:#07101f;color:#fff;overflow:hidden}
 #call .cbg{position:absolute;inset:-30px}
-#call .cbg img{width:100%;height:100%;object-fit:cover;filter:blur(16px) brightness(.32) saturate(1.2)}
+#call .cbg{background:#07101f}
+#call .cbg img{width:100%;height:100%;object-fit:cover;transform:scale(1.15);filter:blur(16px) brightness(.32) saturate(1.2)}
 #call::before{content:"";position:absolute;inset:0;z-index:1;background:radial-gradient(120% 60% at 50% 38%,rgba(80,232,252,.10),transparent 60%),linear-gradient(180deg,rgba(7,16,31,.55),rgba(7,16,31,0) 28%,rgba(7,16,31,0) 55%,rgba(7,16,31,.85))}
 #call>*:not(.cbg){position:absolute;z-index:2}
 .ctop{left:0;right:0;top:calc(30px + var(--sat));display:flex;flex-direction:column;align-items:center;gap:3px;text-shadow:0 1px 6px rgba(0,0,0,.5)}
@@ -512,3 +513,53 @@ input[type=range]{width:100%;accent-color:var(--cyan-bar)}
 /* ---------- 33 チェックリスト：線を引いてから消える ---------- */
 .swr.strike .bd b{background:linear-gradient(currentColor,currentColor) 0 55%/0 1.5px no-repeat;animation:strike .28s .12s ease-out forwards;color:var(--mute)}
 @keyframes strike{to{background-size:100% 1.5px}}
+
+/* ---------- v0.8 お天気スタジオ ---------- */
+#weather{background:#CFE6FF}
+.wx{position:absolute;inset:0;overflow:hidden;color:var(--ink)}
+.wx-bg{position:absolute;inset:0;background:url(wx_studio.webp) left center/cover}
+.wx-bg::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.15),rgba(255,255,255,0) 40%,rgba(20,60,110,.25))}
+.wx-top{position:absolute;left:14px;right:14px;top:calc(14px + var(--sat));display:flex;justify-content:space-between;align-items:flex-end}
+.wx-top em{display:block;font:italic 800 11px "Exo 2",var(--jp);letter-spacing:.3em;color:#2C9CD4}
+.wx-top b{font-size:16px;font-weight:900;color:#143454}
+.wx-top span{font-size:11px;font-weight:700;color:#2C4464;background:rgba(255,255,255,.8);padding:3px 10px;border-radius:999px}
+.wx-board{position:absolute;left:12px;right:12px;top:calc(56px + var(--sat));border-radius:6px;background:rgba(255,255,255,.9);box-shadow:0 6px 20px rgba(30,80,140,.2);border-left:4px solid #5CD0FC;padding:12px 12px 10px;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+.wx-now{display:flex;align-items:center;gap:8px}
+.wx-now svg{width:58px;height:58px;flex:none}
+.wx-temp b{font-size:40px;line-height:1;font-weight:900;color:#F07A3C}
+.wx-temp i{font-style:normal;font-size:20px;font-weight:900;color:#2C9CD4;margin-left:6px}
+.wx-temp small{display:block;font-size:11px;font-weight:700;color:var(--ink2);margin-top:3px}
+.wx-rain{margin-left:auto;text-align:center;padding:5px 10px;border-radius:4px;background:#E6F2FF;flex:none}
+.wx-rain small{display:block;font-size:11px;color:var(--ink3)}
+.wx-rain b{font-size:22px;font-weight:900;color:#2C9CD4}
+.wx-hours{display:grid;grid-template-columns:repeat(6,1fr);gap:2px;margin-top:8px;padding-top:8px;border-top:1px solid rgba(44,156,212,.2)}
+.wx-h{text-align:center;font-size:11px;color:var(--ink3)}
+.wx-h svg{display:block;width:26px;height:26px;margin:1px auto 0}
+.wx-h b{display:block;font-size:13px;font-weight:900;color:var(--ink)}
+.wx-h u{display:block;height:13px;text-decoration:none;font-size:11px;color:#2C9CD4}
+.wx-wear{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+.wx-wear span{font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;background:#FFF3E6;color:#C2602A;border:1px solid #FFD2AD}
+.wx-wear span.u{background:#E6F2FF;color:#2C9CD4;border-color:#BCDCFF}
+.wx-feel{margin-top:7px;font-size:11px;color:var(--ink3)}
+.wx-feel b{font-size:13px;color:var(--ink);margin:0 8px 0 3px}
+.wx-cast{position:absolute;z-index:2;right:-40px;bottom:calc(var(--sab) + 92px);width:min(350px,92vw);filter:drop-shadow(0 10px 18px rgba(20,60,110,.3));animation:wxin .6s var(--ease) .15s backwards}
+.wx-cast.fb{width:min(260px,70vw);right:-10px}
+@keyframes wxin{from{opacity:0;transform:translateX(30px)}to{opacity:1;transform:none}}
+.wx-bubble{position:absolute;z-index:4;left:12px;width:min(190px,50vw);top:calc(var(--sat) + 330px);padding:10px 12px;border-radius:4px;background:rgba(255,255,255,.96);box-shadow:0 6px 18px rgba(20,60,110,.22);font-size:13px;font-weight:500;line-height:1.65;animation:wxin .45s var(--ease) .35s backwards}
+.wx-bubble b{display:block;font:italic 800 11px "Exo 2",var(--jp);letter-spacing:.24em;color:#2C9CD4;margin-bottom:2px}
+.wx-desk{position:absolute;z-index:3;left:-10px;right:-10px;bottom:0;height:calc(var(--sab) + 160px)}
+.wx-desk .tp{position:absolute;left:0;right:0;top:0;height:14px;background:linear-gradient(180deg,#fff,#DBE9F8 60%,#B7CDE6);border-radius:4px 4px 0 0}
+.wx-desk .fr{position:absolute;left:12px;right:12px;top:14px;bottom:0;background:linear-gradient(180deg,#D6E8FC,#A8C8EC 60%,#82AADC);box-shadow:inset 0 10px 16px rgba(30,70,130,.25);overflow:hidden}
+.wx-desk .fr::before{content:"";position:absolute;left:0;right:0;top:10px;height:2px;background:linear-gradient(90deg,transparent,#5CD0FC 20%,#8CE4FC 80%,transparent);box-shadow:0 0 10px #5CD0FC}
+.wx-desk .lbl{position:absolute;left:28px;top:28px;font:italic 800 11px "Exo 2",var(--jp);letter-spacing:.4em;color:rgba(30,80,140,.55)}
+.wx-go{position:absolute;left:28px;right:28px;bottom:calc(var(--sab) + 26px);height:44px}
+@media (max-height:740px){.wx-bubble{top:calc(var(--sat) + 300px)}.wx-cast{width:min(300px,80vw)}.wx-desk{height:calc(var(--sab) + 140px)}}
+.wxc svg{width:18px;height:18px;margin-right:2px}
+.wxc{display:flex;align-items:center}
+.wxc[hidden]{display:none!important}
+/* サブスク */
+.subask{margin:4px 0 8px;padding:10px 12px;border-radius:4px;background:#FFF8E6;border-left:4px solid #ECC824}
+.subask>b{display:block;font-size:13px;font-weight:900;margin-bottom:6px}
+.subask .sa{display:flex;align-items:center;gap:6px;padding:4px 0}
+.subask .sa span:first-child{flex:1;font-size:13px;font-weight:700}
+.tag.red{background:#FDE7E7;color:#E06C6C}
